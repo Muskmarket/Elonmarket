@@ -1,0 +1,431 @@
+import { useState, useEffect } from "react";
+import { Clock, Trophy, Users, Lock, CheckCircle, AlertCircle, Timer, Shield } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { usePredictionRound, PredictionOption } from "@/hooks/usePredictionRound";
+import { usePlatformData } from "@/hooks/usePlatformData";
+import { useVoting } from "@/hooks/useVoting";
+import { useTokenVerification } from "@/hooks/useTokenVerification";
+import { useHasVoted } from "@/hooks/useHasVoted";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { differenceInSeconds, format } from "date-fns";
+
+const optionIcons: Record<string, string> = {
+  Tesla: "🚗",
+  SpaceX: "🚀",
+  Dogecoin: "🐕",
+  Doge: "🐕",
+  "AI/Grok": "🤖",
+  Grok: "🤖",
+  Meme: "😂",
+  X: "✖️",
+  Grokpedia: "📚",
+  Starlink: "🛰️",
+};
+
+const optionColors: Record<string, string> = {
+  Tesla: "bg-red-500",
+  SpaceX: "bg-blue-500",
+  Dogecoin: "bg-yellow-500",
+  Doge: "bg-yellow-500",
+  "AI/Grok": "bg-purple-500",
+  Grok: "bg-purple-500",
+  Meme: "bg-green-500",
+  X: "bg-foreground/50",
+  Grokpedia: "bg-cyan-500",
+  Starlink: "bg-sky-500",
+};
+
+export const PredictionVoting = () => {
+  const { currentRound, options, refetch } = usePredictionRound();
+  const { walletConfig, walletBalances } = usePlatformData();
+  const { submitVote, loading: voteLoading } = useVoting();
+  const { balance, verifyTokenBalance, loading: tokenLoading } = useTokenVerification();
+  const { connected, publicKey } = useWallet();
+  const { setVisible } = useWalletModal();
+  const { hasVoted: hasVotedFromDb, refetch: refetchHasVoted } = useHasVoted(
+    currentRound?.id ?? null,
+    publicKey?.toBase58() ?? null
+  );
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [voteLockRemaining, setVoteLockRemaining] = useState<string>("");
+  const [localHasVoted, setLocalHasVoted] = useState(false);
+  const [isVoteLocked, setIsVoteLocked] = useState(false);
+
+  const hasVoted = hasVotedFromDb || localHasVoted;
+
+  // Check token eligibility when wallet connects
+  useEffect(() => {
+    if (connected && publicKey) {
+      verifyTokenBalance();
+    }
+  }, [connected, publicKey, verifyTokenBalance]);
+
+  // Update countdown timers
+  useEffect(() => {
+    if (!currentRound) return;
+
+    const updateTimer = () => {
+      const now = new Date();
+      
+      // If in cooldown, show cooldown timer
+      if (currentRound.status === "cooldown" && currentRound.cooldown_end_time) {
+        const cooldownEnd = new Date(currentRound.cooldown_end_time);
+        const seconds = differenceInSeconds(cooldownEnd, now);
+        
+        if (seconds <= 0) {
+          setTimeRemaining("Revealing winner...");
+          return;
+        }
+        
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        setTimeRemaining(`${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`);
+        return;
+      }
+
+      // Vote locking logic
+      if (currentRound.status === "open" && currentRound.prediction_start_time) {
+        const predictionStart = new Date(currentRound.prediction_start_time);
+        const voteLockMinutes = currentRound.vote_lock_minutes || 60;
+        const voteLockTime = new Date(predictionStart.getTime() - voteLockMinutes * 60 * 1000);
+        
+        if (now >= voteLockTime) {
+          setIsVoteLocked(true);
+          // Show countdown to prediction start
+          const secsToPrediction = differenceInSeconds(predictionStart, now);
+          if (secsToPrediction > 0) {
+            const mins = Math.floor(secsToPrediction / 60);
+            const secs = secsToPrediction % 60;
+            setVoteLockRemaining(`${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`);
+          } else {
+            setVoteLockRemaining("Monitoring...");
+          }
+        } else {
+          setIsVoteLocked(false);
+          // Show countdown to vote lock
+          const secsToLock = differenceInSeconds(voteLockTime, now);
+          const hours = Math.floor(secsToLock / 3600);
+          const minutes = Math.floor((secsToLock % 3600) / 60);
+          const secs = secsToLock % 60;
+          setVoteLockRemaining(`${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`);
+        }
+      }
+
+      const endTime = new Date(currentRound.end_time);
+      const seconds = differenceInSeconds(endTime, now);
+
+      if (seconds <= 0) {
+        setTimeRemaining("Round ended");
+        return;
+      }
+
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+
+      setTimeRemaining(`${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [currentRound]);
+
+  const handleVote = async () => {
+    if (!selectedOption || !currentRound || !balance?.isEligible || isVoteLocked) return;
+
+    const success = await submitVote(currentRound.id, selectedOption, balance.tokenBalance);
+    if (success) {
+      setLocalHasVoted(true);
+      refetch();
+      refetchHasVoted();
+    }
+  };
+
+  const totalVotes = options.reduce((sum, opt) => sum + opt.vote_count, 0);
+
+  // Calculate current payout from live vault balance
+  const vaultBalance = walletBalances?.vault_balance_sol || 0;
+  const payoutPercentage = walletConfig?.payout_percentage || 20;
+  const currentPayout = (vaultBalance * payoutPercentage) / 100 + (currentRound?.accumulated_from_previous || 0);
+
+  const isRoundOpen = currentRound?.status === "open";
+  const isRoundCooldown = currentRound?.status === "cooldown";
+  const isRoundFinalized = currentRound?.status === "finalized" || currentRound?.status === "paid";
+  const canVote = isRoundOpen && !isVoteLocked;
+
+  return (
+    <section id="predict" className="py-12 relative">
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <div className="mb-6">
+          <h2 className="font-display text-xl md:text-2xl font-semibold text-foreground mb-1">
+            Markets
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            {currentRound?.question || "What will Elon tweet about next?"}
+          </p>
+          {currentRound?.prediction_start_time && currentRound?.end_time && (
+            <div className="mt-2 flex flex-col items-center gap-1">
+              <p className="text-sm text-foreground font-medium flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-neon-cyan" />
+                {format(new Date(currentRound.prediction_start_time), "h:mm a")} – {format(new Date(currentRound.end_time), "h:mm a")} UTC
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {format(new Date(currentRound.prediction_start_time), "MMMM d, yyyy")} • Prediction Window
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Voting Card */}
+          <div className="lg:col-span-2">
+            <Card className="bg-card border-border h-full">
+              <CardHeader className="border-b border-border pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {isRoundOpen && !isVoteLocked ? (
+                      <div className="flex items-center gap-2 text-neon-green">
+                        <span className="w-1.5 h-1.5 bg-neon-green rounded-full animate-pulse" />
+                        <span className="text-sm font-medium">Voting Open</span>
+                      </div>
+                    ) : isRoundOpen && isVoteLocked ? (
+                      <div className="flex items-center gap-2 text-neon-orange">
+                        <Lock className="w-3.5 h-3.5" />
+                        <span className="text-sm font-medium">Votes Locked</span>
+                      </div>
+                    ) : isRoundCooldown ? (
+                      <div className="flex items-center gap-2 text-neon-orange">
+                        <Timer className="w-3.5 h-3.5 animate-pulse" />
+                        <span className="text-sm font-medium">Cooldown</span>
+                      </div>
+                    ) : isRoundFinalized ? (
+                      <div className="flex items-center gap-2 text-neon-purple">
+                        <Trophy className="w-3.5 h-3.5" />
+                        <span className="text-sm font-medium">Finalized</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span className="text-sm font-medium">Upcoming</span>
+                      </div>
+                    )}
+                    <span className="text-xs text-muted-foreground px-2 py-0.5 bg-muted rounded">
+                      Round {currentRound?.round_number || 1}
+                    </span>
+                  </div>
+                  {(isRoundOpen || isRoundCooldown) && (
+                    <div className={`flex items-center gap-1.5 text-sm font-mono ${isRoundCooldown ? "text-neon-orange" : isVoteLocked ? "text-neon-orange" : "text-foreground"}`}>
+                      {isRoundCooldown ? <Timer className="w-3.5 h-3.5" /> : isVoteLocked ? <Lock className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5 text-muted-foreground" />}
+                      {isRoundCooldown ? timeRemaining : isVoteLocked ? voteLockRemaining : timeRemaining}
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
+
+              <CardContent className="p-6">
+                {/* Prediction time frame info */}
+                {currentRound?.prediction_start_time && isRoundOpen && (
+                  <div className={`mb-4 p-2.5 rounded-lg border ${isVoteLocked ? "bg-neon-orange/5 border-neon-orange/30" : "bg-neon-green/5 border-neon-green/30"}`}>
+                    <p className="text-xs">
+                      {isVoteLocked ? (
+                        <span className="text-neon-orange">🔒 Votes locked. Prediction monitoring {voteLockRemaining === "Monitoring..." ? "is active" : `starts in ${voteLockRemaining}`}.</span>
+                      ) : (
+                        <span className="text-neon-green">🟢 Voting is open! Closes in {voteLockRemaining} (before prediction window starts)</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {/* Options Grid */}
+                <div className="space-y-3 mb-6">
+                  {options.map((option) => {
+                    const percentage = totalVotes > 0 ? (option.vote_count / totalVotes) * 100 : 0;
+                    const isSelected = selectedOption === option.id;
+                    const isWinner = option.is_winner;
+
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => !hasVoted && canVote && setSelectedOption(option.id)}
+                        disabled={hasVoted || !canVote}
+                        className={`relative w-full p-3.5 rounded-lg border transition-all duration-200 text-left ${
+                          isWinner
+                            ? "border-neon-green bg-neon-green/5"
+                            : isSelected
+                            ? "border-neon-cyan bg-neon-cyan/5"
+                            : "border-border hover:border-border/80 bg-muted/30"
+                        } ${hasVoted || !canVote ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-muted/50"}`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xl">{optionIcons[option.label] || "⚡"}</span>
+                            <span className="font-medium text-sm">{option.label}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isWinner && (
+                              <span className="flex items-center gap-1 text-neon-green text-xs font-medium">
+                                <Trophy className="w-3.5 h-3.5" />
+                                Winner
+                              </span>
+                            )}
+                            {isSelected && !isWinner && (
+                              <CheckCircle className="w-4 h-4 text-neon-cyan" />
+                            )}
+                            <span className="font-semibold text-sm">{percentage.toFixed(0)}%</span>
+                          </div>
+                        </div>
+
+                        <div className="relative h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className={`absolute inset-y-0 left-0 ${optionColors[option.label] || 'bg-primary'} rounded-full transition-all duration-300`}
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+
+                        <p className="text-xs text-muted-foreground mt-1.5">{option.vote_count} votes</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Vote Button */}
+                <div className="space-y-4">
+                  {!connected ? (
+                    <Button variant="neon" className="w-full" onClick={() => setVisible(true)}>
+                      <Lock className="w-3.5 h-3.5" />
+                      Connect Wallet to Vote
+                    </Button>
+                  ) : tokenLoading ? (
+                    <Button variant="outline" className="w-full" disabled>
+                      Verifying token balance...
+                    </Button>
+                  ) : !balance?.isEligible ? (
+                    <div className="text-center p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+                      <AlertCircle className="w-5 h-5 text-destructive mx-auto mb-1.5" />
+                      <p className="text-destructive font-medium">Insufficient token balance</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        You need at least {walletConfig?.min_token_balance || 1} tokens to participate
+                      </p>
+                    </div>
+                  ) : hasVoted ? (
+                    <div className="text-center p-3 rounded-lg bg-neon-green/10 border border-neon-green/30">
+                      <CheckCircle className="w-5 h-5 text-neon-green mx-auto mb-1.5" />
+                      <p className="text-neon-green font-medium">Vote submitted!</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Your prediction has been recorded</p>
+                    </div>
+                  ) : isRoundCooldown ? (
+                    <div className="text-center p-3 rounded-lg bg-neon-orange/10 border border-neon-orange/30">
+                      <Timer className="w-5 h-5 text-neon-orange mx-auto mb-1.5 animate-pulse" />
+                      <p className="text-neon-orange font-medium">System Cooldown</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Winner will be revealed in {timeRemaining}
+                      </p>
+                    </div>
+                  ) : isVoteLocked ? (
+                    <div className="text-center p-3 rounded-lg bg-neon-orange/10 border border-neon-orange/30">
+                      <Lock className="w-5 h-5 text-neon-orange mx-auto mb-1.5" />
+                      <p className="text-neon-orange font-medium">Voting Locked</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Prediction monitoring {voteLockRemaining === "Monitoring..." ? "is active" : `starts in ${voteLockRemaining}`}
+                      </p>
+                    </div>
+                  ) : !isRoundOpen ? (
+                    <Button variant="outline" className="w-full" disabled>
+                      <Clock className="w-3.5 h-3.5" />
+                      {currentRound?.status === "upcoming" ? "Round not started yet" : "Round has ended"}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="neon"
+                      className="w-full"
+                      onClick={handleVote}
+                      disabled={!selectedOption || voteLoading}
+                    >
+                      {voteLoading ? "Submitting..." : "Submit Prediction"}
+                    </Button>
+                  )}
+
+                  {connected && balance?.isEligible && (
+                    <p className="text-xs text-center text-muted-foreground">
+                      Token balance: {balance.tokenBalance.toLocaleString()} • Eligible to vote ✓
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Reward Info Card */}
+          <div className="space-y-6">
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Trophy className="w-4 h-4 text-neon-green" />
+                  Reward Pool
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    <Shield className="w-3 h-3 inline mr-1" />
+                    Secured SOL
+                  </p>
+                  <p className="font-display text-2xl font-semibold text-neon-green">
+                    {vaultBalance.toFixed(4)} SOL
+                  </p>
+                </div>
+
+                <div className="h-px bg-border" />
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">This Round ({payoutPercentage}%)</p>
+                  <p className="font-display text-xl font-semibold text-neon-cyan">
+                    {currentPayout.toFixed(4)} SOL
+                  </p>
+                </div>
+
+                {(currentRound?.accumulated_from_previous || 0) > 0 && (
+                  <div className="p-2.5 rounded-lg bg-neon-purple/10 border border-neon-purple/30">
+                    <p className="text-xs text-neon-purple font-medium">
+                      +{(currentRound?.accumulated_from_previous || 0).toFixed(4)} SOL accumulated from previous rounds
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Total Votes</span>
+                  <span className="font-semibold flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                    {totalVotes}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Winners</span>
+                  <span className="font-semibold text-neon-green">
+                    {currentRound?.total_winners || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Per Winner</span>
+                  <span className="font-semibold text-neon-purple">
+                    {currentRound?.payout_per_winner?.toFixed(4) || (currentRound?.total_winners ? (currentPayout / currentRound.total_winners).toFixed(4) : "--")} SOL
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};

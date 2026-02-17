@@ -1,0 +1,202 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
+
+async function getSOLBalance(address: string): Promise<number> {
+  if (!address) return 0;
+  const res = await fetch(SOLANA_RPC, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "getBalance",
+      params: [address],
+    }),
+  });
+  const data = await res.json();
+  if (data.error) {
+    console.error("getBalance error:", data.error);
+    return 0;
+  }
+  return (data.result?.value || 0) / 1e9; // lamports to SOL
+}
+
+async function getTokenSupply(mint: string): Promise<{ supply: number; decimals: number }> {
+  if (!mint) return { supply: 0, decimals: 0 };
+  const res = await fetch(SOLANA_RPC, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "getTokenSupply",
+      params: [mint],
+    }),
+  });
+  const data = await res.json();
+  if (data.error) {
+    console.error("getTokenSupply error:", data.error);
+    return { supply: 0, decimals: 0 };
+  }
+  const info = data.result?.value;
+  return {
+    supply: Number(info?.uiAmount || 0),
+    decimals: info?.decimals || 0,
+  };
+}
+
+async function getTokenHolderCount(mint: string): Promise<number> {
+  if (!mint) return 0;
+
+  // Method 1: Pump.fun API (free, works for pump.fun tokens)
+  try {
+    const res = await fetch(`https://frontend-api-v3.pump.fun/coins/${mint}`);
+    if (res.ok) {
+      const data = await res.json();
+      console.log("Pump.fun data keys:", Object.keys(data || {}));
+      const holders = data?.holder_count ?? data?.holderCount ?? data?.holders ?? 0;
+      if (holders > 0) {
+        console.log("Pump.fun holder count:", holders);
+        return holders;
+      }
+    } else {
+      console.log("Pump.fun status:", res.status);
+    }
+  } catch (e) {
+    console.error("Pump.fun API failed:", e);
+  }
+
+  // Method 2: Solscan free public API
+  try {
+    const res = await fetch(
+      `https://public-api.solscan.io/token/meta?tokenAddress=${mint}`,
+      { headers: { Accept: "application/json" } }
+    );
+    console.log("Solscan status:", res.status);
+    if (res.ok) {
+      const data = await res.json();
+      console.log("Solscan data keys:", Object.keys(data || {}));
+      const holders = data?.holder ?? data?.holderCount ?? 0;
+      if (holders > 0) {
+        console.log("Solscan holder count:", holders);
+        return holders;
+      }
+    }
+  } catch (e) {
+    console.error("Solscan API failed:", e);
+  }
+
+  // Method 3: Helius DAS API if key is available
+  const heliusKey = Deno.env.get("HELIUS_API_KEY");
+  if (heliusKey) {
+    try {
+      const res = await fetch(`https://mainnet.helius-rpc.com/?api-key=${heliusKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: "holder-count",
+          method: "getTokenAccounts",
+          params: { mint, limit: 1, page: 1 },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.result?.total) {
+          console.log("Helius holder count:", data.result.total);
+          return data.result.total;
+        }
+      }
+    } catch (e) {
+      console.error("Helius failed:", e);
+    }
+  }
+
+  return 0;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get wallet config from DB
+    const { data: walletConfig } = await supabase
+      .from("wallet_config")
+      .select("vault_wallet_address, payout_wallet_address, token_contract_address, payout_percentage")
+      .single();
+
+    if (!walletConfig) {
+      return new Response(
+        JSON.stringify({ error: "Wallet config not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { vault_wallet_address, payout_wallet_address, token_contract_address, payout_percentage } = walletConfig;
+
+    // Fetch all on-chain data in parallel
+    const [vaultBalanceSOL, payoutBalanceSOL, tokenSupplyData, holderCount] = await Promise.all([
+      getSOLBalance(vault_wallet_address),
+      getSOLBalance(payout_wallet_address),
+      getTokenSupply(token_contract_address),
+      getTokenHolderCount(token_contract_address),
+    ]);
+
+    const currentRoundPayout = vaultBalanceSOL * ((payout_percentage || 15) / 100);
+
+    // Update wallet_balances table so other parts of the app stay in sync
+    await supabase
+      .from("wallet_balances")
+      .upsert({
+        id: "singleton",
+        vault_balance_sol: vaultBalanceSOL,
+        payout_balance_sol: payoutBalanceSOL,
+        claimable_rewards_sol: 0,
+        last_updated_at: new Date().toISOString(),
+      }, { onConflict: "id" });
+
+    const result = {
+      vault: {
+        address: vault_wallet_address,
+        balance_sol: vaultBalanceSOL,
+      },
+      payout: {
+        address: payout_wallet_address,
+        balance_sol: payoutBalanceSOL,
+      },
+      token: {
+        address: token_contract_address,
+        total_supply: tokenSupplyData.supply,
+        decimals: tokenSupplyData.decimals,
+        holder_count: holderCount,
+      },
+      round_payout: {
+        percentage: payout_percentage || 15,
+        estimated_sol: currentRoundPayout,
+      },
+      fetched_at: new Date().toISOString(),
+    };
+
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error: unknown) {
+    console.error("onchain-data error:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});

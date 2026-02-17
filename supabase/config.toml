@@ -1,0 +1,26 @@
+project_id = "afydkqfqzmrevhelmujn"
+
+[functions.fetch-tweets]
+verify_jwt = false
+
+[functions.submit-vote]
+verify_jwt = false
+
+[functions.detect-winner]
+verify_jwt = false
+
+[functions.process-claim]
+verify_jwt = false
+
+[functions.refill-payout]
+verify_jwt = false
+
+[functions.admin]
+verify_jwt = false
+
+[functions.verify-token-balance]
+verify_jwt = false
+
+
+[functions.ifttt-webhook]
+verify_jwt = false

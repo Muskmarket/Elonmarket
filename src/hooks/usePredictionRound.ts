@@ -1,0 +1,141 @@
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+export interface PredictionOption {
+  id: string;
+  round_id: string;
+  label: string;
+  keywords: string[];
+  vote_count: number;
+  is_winner: boolean;
+  color: string;
+  icon: string;
+}
+
+export interface PredictionRound {
+  id: string;
+  round_number: number;
+  question: string;
+  start_time: string;
+  end_time: string;
+  prediction_start_time?: string;
+  vote_lock_minutes?: number;
+  cooldown_end_time?: string;
+  status: "upcoming" | "open" | "cooldown" | "finalizing" | "finalized" | "paid" | "no_winner";
+  winning_option_id?: string;
+  winning_tweet_id?: string;
+  winning_tweet_text?: string;
+  vault_balance_snapshot?: number;
+  payout_amount?: number;
+  payout_per_winner?: number;
+  total_winners: number;
+  total_votes: number;
+  refill_completed: boolean;
+  accumulated_from_previous: number;
+  prediction_options?: PredictionOption[];
+}
+
+export function usePredictionRound() {
+  const [currentRound, setCurrentRound] = useState<PredictionRound | null>(null);
+  const [options, setOptions] = useState<PredictionOption[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCurrentRound = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      // Get current open round
+      const { data: openRound } = await supabase
+        .from("prediction_rounds")
+        .select("*")
+        .eq("status", "open")
+        .maybeSingle();
+
+      let round = openRound;
+
+      if (!round) {
+        // Try cooldown round
+        const { data: cooldownRound } = await supabase
+          .from("prediction_rounds")
+          .select("*")
+          .eq("status", "cooldown" as any)
+          .maybeSingle();
+
+        round = cooldownRound;
+      }
+
+      if (!round) {
+        // Try upcoming round
+        const { data: upcomingRound } = await supabase
+          .from("prediction_rounds")
+          .select("*")
+          .eq("status", "upcoming")
+          .order("start_time", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        round = upcomingRound;
+      }
+
+      if (!round) {
+        // Get latest finalized round
+        const { data: latestRound } = await supabase
+          .from("prediction_rounds")
+          .select("*")
+          .in("status", ["finalized", "paid"])
+          .order("finalized_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        round = latestRound;
+      }
+
+      if (round) {
+        setCurrentRound(round as PredictionRound);
+
+        // Fetch options for this round
+        const { data: optionsData } = await supabase
+          .from("prediction_options")
+          .select("*")
+          .eq("round_id", round.id)
+          .order("vote_count", { ascending: false });
+
+        setOptions((optionsData as PredictionOption[]) || []);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCurrentRound();
+
+    const roundsChannel = supabase
+      .channel("rounds")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "prediction_rounds" },
+        () => fetchCurrentRound()
+      )
+      .subscribe();
+
+    const optionsChannel = supabase
+      .channel("options")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "prediction_options" },
+        () => fetchCurrentRound()
+      )
+      .subscribe();
+
+    return () => {
+      roundsChannel.unsubscribe();
+      optionsChannel.unsubscribe();
+    };
+  }, [fetchCurrentRound]);
+
+  return { currentRound, options, loading, error, refetch: fetchCurrentRound };
+}
