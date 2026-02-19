@@ -8,8 +8,7 @@ import { usePlatformData } from "@/hooks/usePlatformData";
 import { useVoting } from "@/hooks/useVoting";
 import { useTokenVerification } from "@/hooks/useTokenVerification";
 import { useHasVoted } from "@/hooks/useHasVoted";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useAuth } from "@/contexts/AuthContext";
 import { differenceInSeconds, format } from "date-fns";
 
 const optionIcons: Record<string, string> = {
@@ -43,11 +42,10 @@ export const PredictionVoting = () => {
   const { walletConfig, walletBalances } = usePlatformData();
   const { submitVote, loading: voteLoading } = useVoting();
   const { balance, verifyTokenBalance, loading: tokenLoading } = useTokenVerification();
-  const { connected, publicKey } = useWallet();
-  const { setVisible } = useWalletModal();
+  const { user } = useAuth();
   const { hasVoted: hasVotedFromDb, refetch: refetchHasVoted } = useHasVoted(
     currentRound?.id ?? null,
-    publicKey?.toBase58() ?? null
+    user?.wallet_address ?? null
   );
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<string>("");
@@ -57,12 +55,12 @@ export const PredictionVoting = () => {
 
   const hasVoted = hasVotedFromDb || localHasVoted;
 
-  // Check token eligibility when wallet connects
+  // Check token eligibility when user logs in
   useEffect(() => {
-    if (connected && publicKey) {
+    if (user?.wallet_address) {
       verifyTokenBalance();
     }
-  }, [connected, publicKey, verifyTokenBalance]);
+  }, [user?.wallet_address, verifyTokenBalance]);
 
   // Update countdown timers
   useEffect(() => {
@@ -296,10 +294,10 @@ export const PredictionVoting = () => {
 
                 {/* Vote Button */}
                 <div className="space-y-4">
-                  {!connected ? (
-                    <Button variant="neon" className="w-full" onClick={() => setVisible(true)}>
+                  {!user ? (
+                    <Button variant="neon" className="w-full" disabled>
                       <Lock className="w-3.5 h-3.5" />
-                      Connect Wallet to Vote
+                      Log in to vote
                     </Button>
                   ) : tokenLoading ? (
                     <Button variant="outline" className="w-full" disabled>
@@ -351,7 +349,7 @@ export const PredictionVoting = () => {
                     </Button>
                   )}
 
-                  {connected && balance?.isEligible && (
+                  {user && balance?.isEligible && (
                     <p className="text-xs text-center text-muted-foreground">
                       Token balance: {balance.tokenBalance.toLocaleString()} • Eligible to vote ✓
                     </p>

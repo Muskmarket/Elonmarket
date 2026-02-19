@@ -1,18 +1,18 @@
 import { useState, useCallback } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function useVoting() {
-  const { publicKey } = useWallet();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const submitVote = useCallback(
     async (roundId: string, optionId: string, tokenBalance: number) => {
-      if (!publicKey) {
+      if (!user) {
         toast({
-          title: "Wallet not connected",
-          description: "Please connect your wallet to vote",
+          title: "Not logged in",
+          description: "Please log in with username & wallet to vote",
           variant: "destructive",
         });
         return false;
@@ -30,7 +30,7 @@ export function useVoting() {
               Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
             },
             body: JSON.stringify({
-              walletAddress: publicKey.toBase58(),
+              walletAddress: user.wallet_address,
               roundId,
               optionId,
               tokenBalance,
@@ -61,7 +61,7 @@ export function useVoting() {
         setLoading(false);
       }
     },
-    [publicKey, toast]
+    [user, toast]
   );
 
   return { submitVote, loading };

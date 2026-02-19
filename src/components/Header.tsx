@@ -1,25 +1,25 @@
-import { Target, Wallet, Menu, X, Shield } from "lucide-react";
+import { Target, User as UserIcon, Menu, X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { usePlatformData } from "@/hooks/usePlatformData";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
 
 export const Header = () => {
-  const { publicKey, connected, disconnect } = useWallet();
-  const { setVisible } = useWalletModal();
   const { payoutStats } = usePlatformData();
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (publicKey) {
+      if (user?.wallet_address) {
         const { data } = await supabase.rpc("is_admin_wallet", {
-          _wallet: publicKey.toBase58(),
+          _wallet: user.wallet_address,
         });
         setIsAdmin(!!data);
       } else {
@@ -27,15 +27,7 @@ export const Header = () => {
       }
     };
     checkAdmin();
-  }, [publicKey]);
-
-  const handleConnect = () => {
-    setVisible(true);
-  };
-
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 4)}...${address.slice(-4)}`;
-  };
+  }, [user?.wallet_address]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
@@ -91,25 +83,35 @@ export const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
-            {connected && publicKey ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => disconnect()}
-                className="hidden sm:flex"
-              >
-                <Wallet className="w-4 h-4" />
-                {formatAddress(publicKey.toBase58())}
-              </Button>
+            {user ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden sm:flex gap-2"
+                  onClick={() => navigate("/profile")}
+                >
+                  <UserIcon className="w-4 h-4" />
+                  <span className="max-w-[120px] truncate">{user.display_name || "User"}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hidden sm:inline-flex"
+                  onClick={logout}
+                >
+                  <span className="text-xs">✕</span>
+                </Button>
+              </>
             ) : (
               <Button
                 variant="neon"
                 size="sm"
-                onClick={handleConnect}
+                onClick={() => setAuthModalOpen(true)}
                 className="hidden sm:flex"
               >
-                <Wallet className="w-4 h-4" />
-                Connect
+                <UserIcon className="w-4 h-4" />
+                Login
               </Button>
             )}
 
@@ -151,7 +153,7 @@ export const Header = () => {
               </a>
               {isAdmin && (
                 <Link
-                to="/admin65131200"
+                  to="/admin65131200"
                   className="text-sm text-neon-purple hover:text-foreground transition-colors flex items-center gap-1"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -159,21 +161,22 @@ export const Header = () => {
                   Admin
                 </Link>
               )}
-              {connected && publicKey ? (
-                <Button variant="outline" size="sm" onClick={() => disconnect()}>
-                  <Wallet className="w-4 h-4" />
-                  {formatAddress(publicKey.toBase58())}
+              {user ? (
+                <Button variant="outline" size="sm" onClick={logout}>
+                  <UserIcon className="w-4 h-4" />
+                  Logout
                 </Button>
               ) : (
-                <Button variant="neon" size="sm" onClick={handleConnect}>
-                  <Wallet className="w-4 h-4" />
-                  Connect
+                <Button variant="neon" size="sm" onClick={() => { setAuthModalOpen(true); setMobileMenuOpen(false); }}>
+                  <UserIcon className="w-4 h-4" />
+                  Login
                 </Button>
               )}
             </nav>
           </div>
         )}
       </div>
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </header>
   );
 };

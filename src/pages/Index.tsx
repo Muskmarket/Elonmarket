@@ -3,7 +3,6 @@ import { HeroSection } from "@/components/HeroSection";
 import { LiveFeed } from "@/components/LiveFeed";
 import { PredictionVoting } from "@/components/PredictionVoting";
 import { Leaderboard } from "@/components/Leaderboard";
-import { ClaimSection } from "@/components/ClaimSection";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
@@ -14,7 +13,6 @@ const Index = () => {
         <HeroSection />
         <LiveFeed />
         <PredictionVoting />
-        <ClaimSection />
         <Leaderboard />
       </main>
       <Footer />

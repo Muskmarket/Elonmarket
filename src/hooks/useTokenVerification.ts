@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TokenBalance {
   walletAddress: string;
@@ -10,14 +10,14 @@ interface TokenBalance {
 }
 
 export function useTokenVerification() {
-  const { publicKey, signMessage } = useWallet();
+  const { user } = useAuth();
   const [balance, setBalance] = useState<TokenBalance | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const verifyTokenBalance = useCallback(async () => {
-    if (!publicKey) {
-      setError("Wallet not connected");
+    if (!user) {
+      setError("Not logged in");
       return null;
     }
 
@@ -34,7 +34,7 @@ export function useTokenVerification() {
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
-            walletAddress: publicKey.toBase58(),
+            walletAddress: user.wallet_address,
           }),
         }
       );
@@ -53,31 +53,12 @@ export function useTokenVerification() {
     } finally {
       setLoading(false);
     }
-  }, [publicKey]);
-
-  const signMessageForClaim = useCallback(
-    async (roundId: string) => {
-      if (!publicKey || !signMessage) {
-        throw new Error("Wallet not connected or doesn't support signing");
-      }
-
-      const message = `Claim reward for round ${roundId} - MuskMarket - ${Date.now()}`;
-      const encodedMessage = new TextEncoder().encode(message);
-      const signature = await signMessage(encodedMessage);
-
-      return {
-        message,
-        signature: Buffer.from(signature).toString("base64"),
-      };
-    },
-    [publicKey, signMessage]
-  );
+  }, [user]);
 
   return {
     balance,
     loading,
     error,
     verifyTokenBalance,
-    signMessageForClaim,
   };
 }
