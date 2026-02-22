@@ -6,8 +6,6 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { supabase } from "@/integrations/supabase/client";
-
 interface UserProfile {
   id: string;
   display_name: string | null;
@@ -56,34 +54,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     async (username: string, walletAddress: string) => {
       setError(null);
       try {
-        const { data, error: insertError } = await supabase
-          .from("profiles")
-          .insert({
-            display_name: username,
-            wallet_address: walletAddress,
-          })
-          .select("id, display_name, wallet_address, total_wins, total_predictions, total_claimed_usd")
-          .single();
-
-        if (insertError) {
-          if (
-            insertError.message?.includes("profiles_username_unique") ||
-            insertError.message?.includes("display_name")
-          ) {
-            setError("Username is already taken.");
-          } else if (
-            insertError.message?.includes("profiles_wallet_unique") ||
-            insertError.message?.includes("wallet_address")
-          ) {
-            setError("Wallet is already registered.");
-          } else {
-            setError(insertError.message);
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auth-register`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({
+              action: "register",
+              username,
+              walletAddress,
+            }),
           }
+        );
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error ?? "Registration failed.");
           return false;
         }
 
-        if (data) {
-          saveUser(data as UserProfile);
+        if (data.user) {
+          saveUser(data.user as UserProfile);
           return true;
         }
 
@@ -101,24 +95,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     async (username: string, walletAddress: string) => {
       setError(null);
       try {
-        const { data, error: selectError } = await supabase
-          .from("profiles")
-          .select("id, display_name, wallet_address, total_wins, total_predictions, total_claimed_usd")
-          .eq("display_name", username)
-          .single();
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auth-register`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({
+              action: "login",
+              username,
+              walletAddress,
+            }),
+          }
+        );
+        const data = await res.json();
 
-        if (selectError || !data) {
-          setError("User not found.");
+        if (!res.ok) {
+          setError(data.error ?? "Login failed.");
           return false;
         }
 
-        if (data.wallet_address !== walletAddress) {
-          setError("Wallet address does not match this username.");
-          return false;
+        if (data.user) {
+          saveUser(data.user as UserProfile);
+          return true;
         }
 
-        saveUser(data as UserProfile);
-        return true;
+        setError("Login failed.");
+        return false;
       } catch (e) {
         setError(e instanceof Error ? e.message : "Login failed.");
         return false;
