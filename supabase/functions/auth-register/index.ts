@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "register") {
-      // Check if wallet or username already exists
+      // Check if wallet already exists (one account per wallet)
       const { data: existingByWallet } = await supabase
         .from("profiles")
         .select("id")
@@ -42,13 +42,25 @@ Deno.serve(async (req) => {
         );
       }
 
-      const { data: existingByUsername } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("display_name", username)
-        .maybeSingle();
+      // Block registration if username is already used (case-insensitive)
+      const { data: usernameTaken, error: rpcError } = await supabase
+        .rpc("profile_username_exists", { _username: username });
 
-      if (existingByUsername) {
+      if (rpcError) {
+        // Fallback when RPC is missing: check with ilike (case-insensitive), exact match by escaping %_
+        const escaped = username.replace(/[%_\\]/g, "\\$&");
+        const { data: existingByName } = await supabase
+          .from("profiles")
+          .select("id")
+          .ilike("display_name", escaped)
+          .limit(1);
+        if (existingByName && existingByName.length > 0) {
+          return new Response(
+            JSON.stringify({ error: "Username is already taken." }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } else if (usernameTaken) {
         return new Response(
           JSON.stringify({ error: "Username is already taken." }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -65,6 +77,21 @@ Deno.serve(async (req) => {
         .single();
 
       if (insertError) {
+        const code = (insertError as { code?: string }).code;
+        const msg = (insertError.message || "").toLowerCase();
+        // Unique violation: never allow duplicate username or wallet
+        if (code === "23505") {
+          if (msg.includes("wallet") || (insertError as { details?: string }).details?.includes("wallet")) {
+            return new Response(
+              JSON.stringify({ error: "Wallet is already registered." }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          return new Response(
+            JSON.stringify({ error: "Username is already taken." }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
         console.error("Profile insert error:", insertError);
         return new Response(
           JSON.stringify({ error: insertError.message || "Registration failed." }),
