@@ -9,19 +9,20 @@ import { useVoting } from "@/hooks/useVoting";
 import { useTokenVerification } from "@/hooks/useTokenVerification";
 import { useHasVoted } from "@/hooks/useHasVoted";
 import { useAuth } from "@/contexts/AuthContext";
-import { differenceInSeconds, format } from "date-fns";
+import { differenceInSeconds } from "date-fns";
+import { formatToLocalTime, formatToLocalFullDate } from "@/lib/utils";
 
 const optionIcons: Record<string, string> = {
-  Tesla: "🚗",
-  SpaceX: "🚀",
-  Dogecoin: "🐕",
-  Doge: "🐕",
-  "AI/Grok": "🤖",
-  Grok: "🤖",
-  Meme: "😂",
-  X: "✖️",
-  Grokpedia: "📚",
-  Starlink: "🛰️",
+  Tesla: "/tesla-logo.png",
+  SpaceX: "/spacex-logo.png",
+  Dogecoin: "/doge-logo.png",
+  Doge: "/doge-logo.png",
+  "AI/Grok": "/grok-logo.png",
+  Grok: "/grok-logo.png",
+  Meme: "/doge-logo.png", // Using doge as a proxy for meme
+  X: "/x-logo.png",
+  Grokpedia: "/grok-logo.png", // Using grok as a proxy
+  Starlink: "/spacex-logo.png", // Using spacex as a proxy
 };
 
 const optionColors: Record<string, string> = {
@@ -69,22 +70,6 @@ export const PredictionVoting = () => {
     const updateTimer = () => {
       const now = new Date();
       
-      // If in cooldown, show cooldown timer
-      if (currentRound.status === "cooldown" && currentRound.cooldown_end_time) {
-        const cooldownEnd = new Date(currentRound.cooldown_end_time);
-        const seconds = differenceInSeconds(cooldownEnd, now);
-        
-        if (seconds <= 0) {
-          setTimeRemaining("Revealing winner...");
-          return;
-        }
-        
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        setTimeRemaining(`${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`);
-        return;
-      }
-
       // Vote locking logic
       if (currentRound.status === "open" && currentRound.prediction_start_time) {
         const predictionStart = new Date(currentRound.prediction_start_time);
@@ -152,8 +137,7 @@ export const PredictionVoting = () => {
   const currentPayout = (vaultBalance * payoutPercentage) / 100 + (currentRound?.accumulated_from_previous || 0);
 
   const isRoundOpen = currentRound?.status === "open";
-  const isRoundCooldown = currentRound?.status === "cooldown";
-  const isRoundFinalized = currentRound?.status === "finalized" || currentRound?.status === "paid";
+  const isRoundFinalized = currentRound?.status === "finalized" || currentRound?.status === "paid" || currentRound?.status === "no_winner";
   const canVote = isRoundOpen && !isVoteLocked;
 
   return (
@@ -164,17 +148,21 @@ export const PredictionVoting = () => {
           <h2 className="font-display text-xl md:text-2xl font-semibold text-foreground mb-1">
             Markets
           </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
+          <p className="font-display text-xl mt-2 flex flex-col items-center gap-1 md:text-2xl font-semibold text-muted-foreground mb-1">
             {currentRound?.question || "What will Elon tweet about next?"}
           </p>
           {currentRound?.prediction_start_time && currentRound?.end_time && (
             <div className="mt-2 flex flex-col items-center gap-1">
-              <p className="text-sm text-foreground font-medium flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-neon-cyan" />
-                {format(new Date(currentRound.prediction_start_time), "h:mm a")} – {format(new Date(currentRound.end_time), "h:mm a")} UTC
-              </p>
+                            <p className="text-sm text-foreground font-medium flex items-center gap-1.5">
+                              <span className="ml-1 px-1.5 py-0.5 rounded bg-white text-black text-[10px] font-bold uppercase tracking-wider border border-neon-cyan/20">
+                                Within
+                              </span>
+                              <Clock className="w-3.5 h-3.5 text-neon-cyan" />
+                              {formatToLocalTime(currentRound.prediction_start_time)} – {formatToLocalTime(currentRound.end_time)}
+                              
+                            </p>
               <p className="text-xs text-muted-foreground">
-                {format(new Date(currentRound.prediction_start_time), "MMMM d, yyyy")} • Prediction Window
+                {formatToLocalFullDate(currentRound.prediction_start_time)} • Local Time ({Intl.DateTimeFormat().resolvedOptions().timeZone})
               </p>
             </div>
           )}
@@ -197,11 +185,6 @@ export const PredictionVoting = () => {
                         <Lock className="w-3.5 h-3.5" />
                         <span className="text-sm font-medium">Votes Locked</span>
                       </div>
-                    ) : isRoundCooldown ? (
-                      <div className="flex items-center gap-2 text-neon-orange">
-                        <Timer className="w-3.5 h-3.5 animate-pulse" />
-                        <span className="text-sm font-medium">Cooldown</span>
-                      </div>
                     ) : isRoundFinalized ? (
                       <div className="flex items-center gap-2 text-neon-purple">
                         <Trophy className="w-3.5 h-3.5" />
@@ -217,10 +200,10 @@ export const PredictionVoting = () => {
                       Round {currentRound?.round_number || 1}
                     </span>
                   </div>
-                  {(isRoundOpen || isRoundCooldown) && (
-                    <div className={`flex items-center gap-1.5 text-sm font-mono ${isRoundCooldown ? "text-neon-orange" : isVoteLocked ? "text-neon-orange" : "text-foreground"}`}>
-                      {isRoundCooldown ? <Timer className="w-3.5 h-3.5" /> : isVoteLocked ? <Lock className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5 text-muted-foreground" />}
-                      {isRoundCooldown ? timeRemaining : isVoteLocked ? voteLockRemaining : timeRemaining}
+                  {isRoundOpen && (
+                    <div className={`flex items-center gap-1.5 text-sm font-mono ${isVoteLocked ? "text-neon-orange" : "text-foreground"}`}>
+                      {isVoteLocked ? <Lock className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5 text-muted-foreground" />}
+                      {isVoteLocked ? voteLockRemaining : timeRemaining}
                     </div>
                   )}
                 </div>
@@ -262,7 +245,17 @@ export const PredictionVoting = () => {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2.5">
-                            <span className="text-xl">{optionIcons[option.label] || "⚡"}</span>
+                            {optionIcons[option.label] ? (
+                              <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center border border-border/50 bg-background/50">
+                                <img 
+                                  src={optionIcons[option.label]} 
+                                  alt={option.label} 
+                                  className="w-6 h-6 object-contain" 
+                                />
+                              </div>
+                            ) : (
+                              <span className="text-xl">⚡</span>
+                            )}
                             <span className="font-medium text-sm">{option.label}</span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -316,14 +309,6 @@ export const PredictionVoting = () => {
                       <CheckCircle className="w-5 h-5 text-neon-green mx-auto mb-1.5" />
                       <p className="text-neon-green font-medium">Vote submitted!</p>
                       <p className="text-xs text-muted-foreground mt-0.5">Your prediction has been recorded</p>
-                    </div>
-                  ) : isRoundCooldown ? (
-                    <div className="text-center p-3 rounded-lg bg-neon-orange/10 border border-neon-orange/30">
-                      <Timer className="w-5 h-5 text-neon-orange mx-auto mb-1.5 animate-pulse" />
-                      <p className="text-neon-orange font-medium">System Cooldown</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Winner will be revealed in {timeRemaining}
-                      </p>
                     </div>
                   ) : isVoteLocked ? (
                     <div className="text-center p-3 rounded-lg bg-neon-orange/10 border border-neon-orange/30">

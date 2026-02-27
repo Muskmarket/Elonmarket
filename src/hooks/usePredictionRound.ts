@@ -20,8 +20,7 @@ export interface PredictionRound {
   end_time: string;
   prediction_start_time?: string;
   vote_lock_minutes?: number;
-  cooldown_end_time?: string;
-  status: "upcoming" | "open" | "cooldown" | "finalizing" | "finalized" | "paid" | "no_winner";
+  status: "upcoming" | "open" | "finalizing" | "finalized" | "paid" | "no_winner";
   winning_option_id?: string;
   winning_tweet_id?: string;
   winning_tweet_text?: string;
@@ -53,17 +52,6 @@ export function usePredictionRound() {
         .maybeSingle();
 
       let round = openRound;
-
-      if (!round) {
-        // Try cooldown round
-        const { data: cooldownRound } = await supabase
-          .from("prediction_rounds")
-          .select("*")
-          .eq("status", "cooldown" as any)
-          .maybeSingle();
-
-        round = cooldownRound;
-      }
 
       if (!round) {
         // Try upcoming round

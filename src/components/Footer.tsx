@@ -32,28 +32,21 @@ export const Footer = () => {
           <div>
             <h4 className="font-display font-medium mb-3 text-sm">Community</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Discord</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Twitter/X</a></li>
-              <li><a href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">Docs</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Support</a></li>
+              <li><a href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">Docs</a></li> 
             </ul>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-between pt-6 border-t border-border">
           <p className="text-xs text-muted-foreground mb-4 md:mb-0">
-            © 2025 MUSKMARKET. Not affiliated with Elon Musk or X Corp.
+            © 2026 MUSKMARKET. Not affiliated with Elon Musk or X Corp.
           </p>
           <div className="flex items-center gap-4">
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               <Twitter className="w-5 h-5" />
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              <MessageCircle className="w-5 h-5" />
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              <Github className="w-5 h-5" />
-            </a>
+            
           </div>
         </div>
       </div>

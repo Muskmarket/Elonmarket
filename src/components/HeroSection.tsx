@@ -2,14 +2,46 @@ import { TrendingUp, Users, Zap, DollarSign, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlatformData } from "@/hooks/usePlatformData";
 import { useOnchainData } from "@/hooks/useOnchainData";
+import { usePredictionRound } from "@/hooks/usePredictionRound";
+import { useState, useEffect } from "react";
 
 export const HeroSection = () => {
-  const { payoutStats } = usePlatformData();
+  const { payoutStats, playerCount } = usePlatformData();
   const { data: onchain } = useOnchainData();
+  const { currentRound } = usePredictionRound();
+  const [status, setStatus] = useState<{ label: string; color: string; pulse: boolean }>({
+    label: "Predictions Closed",
+    color: "text-muted-foreground",
+    pulse: false
+  });
 
   const vaultBalanceSOL = onchain?.vault.balance_sol ?? 0;
-  const holderCount = onchain?.token.holder_count ?? 0;
-  const totalSupply = onchain?.token.total_supply ?? 0;
+
+  useEffect(() => {
+    const updateStatus = () => {
+      if (!currentRound || currentRound.status !== "open") {
+        setStatus({ label: "Predictions Closed", color: "text-muted-foreground", pulse: false });
+        return;
+      }
+
+      const now = new Date();
+      const predictionStart = currentRound.prediction_start_time ? new Date(currentRound.prediction_start_time) : null;
+      const voteLockMinutes = currentRound.vote_lock_minutes || 60;
+      const voteLockTime = predictionStart ? new Date(predictionStart.getTime() - voteLockMinutes * 60 * 1000) : null;
+
+      if (voteLockTime && now >= voteLockTime) {
+        // We are in the monitoring phase (either waiting for start or already scanning)
+        setStatus({ label: "Monitoring", color: "text-neon-cyan", pulse: true });
+      } else {
+        // Voting is still open
+        setStatus({ label: "Predictions Open", color: "text-neon-green", pulse: true });
+      }
+    };
+
+    updateStatus();
+    const interval = setInterval(updateStatus, 5000); // Check every 5s
+    return () => clearInterval(interval);
+  }, [currentRound]);
 
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
@@ -32,16 +64,15 @@ export const HeroSection = () => {
         <div className="max-w-3xl mx-auto text-center">
           {/* Live Badge */}
           <div className="inline-flex items-center gap-2 bg-card/80 border border-border px-4 py-2 rounded-full mb-6 animate-slide-up">
-            <span className="w-2 h-2 bg-neon-green rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-foreground">Predictions Open</span>
+            <span className={`w-2 h-2 rounded-full ${status.color.replace('text-', 'bg-')} ${status.pulse ? 'animate-pulse' : ''}`} />
+            <span className={`text-sm font-medium ${status.color}`}>{status.label}</span>
             <span className="text-sm text-muted-foreground">•</span>
             <span className="text-sm text-neon-green font-medium">{vaultBalanceSOL.toFixed(4)} SOL Secured</span>
           </div>
 
           {/* Main Title */}
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-slide-up tracking-tight" style={{ animationDelay: "0.1s" }}>
-            <span className="text-foreground">MUSK</span>
-            <span className="gradient-text">MARKET</span>
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-slide-up tracking-tight text-white" style={{ animationDelay: "0.1s" }}>
+            MUSK MARKET
           </h1>
 
           <p className="text-lg md:text-xl text-foreground/90 mb-3 animate-slide-up font-medium" style={{ animationDelay: "0.2s" }}>
@@ -50,25 +81,27 @@ export const HeroSection = () => {
 
           <p className="text-base text-muted-foreground mb-8 max-w-xl mx-auto animate-slide-up" style={{ animationDelay: "0.3s" }}>
             Free-to-play prediction market powered by Solana. 
-            Hold tokens, make predictions, earn rewards.
+            Hold $MUX tokens, make predictions, earn rewards.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12 animate-slide-up" style={{ animationDelay: "0.4s" }}>
-            <Button variant="neon" size="lg" className="group min-w-[180px]">
-              <Target className="w-4 h-4" />
-              Start Predicting
+            <Button asChild size="lg" className="group min-w-[180px] bg-white text-black hover:bg-white/90">
+              <a href="#predict">
+                <Target className="w-4 h-4" />
+                Start Predicting
+              </a>
             </Button>
             <Button variant="outline" size="lg" className="group min-w-[180px]">
               <TrendingUp className="w-4 h-4" />
-              View Markets
+              Buy $MUX
             </Button>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 animate-slide-up" style={{ animationDelay: "0.5s" }}>
             {[
-              { icon: Users, label: holderCount > 0 ? "Token Holders" : "Token Supply", value: holderCount > 0 ? formatSupply(holderCount) : totalSupply > 0 ? formatSupply(totalSupply) : "—", color: "text-neon-cyan" },
+              { icon: Users, label: "Players", value: playerCount.toLocaleString(), color: "text-neon-cyan" },
               { icon: TrendingUp, label: "Predictions", value: (payoutStats?.total_predictions_made || 0).toLocaleString(), color: "text-neon-green" },
               { icon: DollarSign, label: "Total Paid", value: `$${(payoutStats?.total_paid_usd || 0).toLocaleString()}`, color: "text-neon-purple" },
               { icon: Zap, label: "Rounds", value: (payoutStats?.total_rounds_completed || 0).toString(), color: "text-neon-orange" },
@@ -87,10 +120,3 @@ export const HeroSection = () => {
     </section>
   );
 };
-
-function formatSupply(n: number): string {
-  if (n >= 1e9) return `${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
-  if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
-  return n.toLocaleString();
-}

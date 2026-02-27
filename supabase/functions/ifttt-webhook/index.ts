@@ -6,8 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-webhook-secret",
 };
 
-const ELON_AVATAR =
-  "https://pbs.twimg.com/profile_images/1815749056821346304/jS8I28PL_400x400.jpg";
+const ELON_AVATAR = "https://pbs.twimg.com/profile_images/2008546467615580160/57KcqsTA_400x400.jpg";
 
 /**
  * IFTTT Webhook — ultra-fast responder.
@@ -94,11 +93,12 @@ Deno.serve(async (req) => {
 
     // IFTTT sends timestamps in the applet-owner's local timezone.
     // Configure this offset (in hours) to match your IFTTT account timezone.
-    // Philippines (PHT) = UTC+8
-    const IFTTT_TIMEZONE_OFFSET_HOURS = 8;
+    const IFTTT_TIMEZONE_OFFSET_HOURS = parseInt(Deno.env.get("IFTTT_TIMEZONE_OFFSET") || "0", 10);
+    console.log("Using IFTTT_TIMEZONE_OFFSET_HOURS:", IFTTT_TIMEZONE_OFFSET_HOURS);
 
     let parsedDate: string;
     try {
+      console.log("Attempting to parse createdAt:", createdAt);
       // IFTTT sends dates like "February 09, 2026 at 01:18PM"
       const match = createdAt.match(
         /^(\w+)\s+(\d{1,2}),\s+(\d{4})\s+at\s+(\d{1,2}):(\d{2})(AM|PM)$/i
@@ -119,15 +119,19 @@ Deno.serve(async (req) => {
 
         // Build a Date in the IFTTT sender's local time, then subtract the offset to get UTC
         const localDate = new Date(`${year}-${mm}-${dd}T${hhStr}:${minute}:00.000Z`);
+        console.log("Interpreted localDate (as UTC before offset):", localDate.toISOString());
         localDate.setUTCHours(localDate.getUTCHours() - IFTTT_TIMEZONE_OFFSET_HOURS);
         parsedDate = localDate.toISOString();
+        console.log("Final parsed UTC date after offset:", parsedDate);
       } else {
         // Fallback: try generic parsing
         const sanitized = createdAt.replace(/\s+at\s+/i, " ");
         const d = new Date(sanitized);
         parsedDate = isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+        console.log("Fallback parsing result:", parsedDate);
       }
-    } catch {
+    } catch (err) {
+      console.error("Date parsing error:", err);
       parsedDate = new Date().toISOString();
     }
 

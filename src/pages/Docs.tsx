@@ -29,7 +29,7 @@ const Docs = () => {
             </CardHeader>
             <CardContent className="prose prose-invert max-w-none">
               <p className="text-muted-foreground">
-                MuskMarket is a free-to-play prediction platform where token holders predict what Elon Musk will tweet about first within a daily timeframe. Winners share rewards from a pool funded by PumpFun creator rewards.
+                MuskMarket is a free-to-play prediction platform where $MUX token holders predict what Elon Musk will tweet about first within a daily timeframe. Winners share rewards from a pool funded by PumpFun creator rewards.
               </p>
             </CardContent>
           </Card>
@@ -48,7 +48,7 @@ const Docs = () => {
               </div>
               <div className="flex gap-4">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">2</div>
-                <div><strong>Hold Tokens</strong> - Meet minimum token requirement</div>
+                <div><strong>Hold $MUX Tokens</strong> - Meet minimum token requirement</div>
               </div>
               <div className="flex gap-4">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">3</div>

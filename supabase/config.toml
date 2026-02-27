@@ -22,6 +22,9 @@ verify_jwt = false
 verify_jwt = false
 
 
+[functions.onchain-data]
+verify_jwt = false
+
 [functions.ifttt-webhook]
 verify_jwt = false
 

@@ -1,73 +1,82 @@
-# Welcome to your Lovable project
+# 🚀 MuskMarket: Elon Musk Prediction Game
 
-## Project info
+MuskMarket is a high-stakes, free-to-play prediction platform built on **Solana** and **Supabase**. Players use their $MUX tokens to predict the topic of Elon Musk's next post on X (Twitter). Correct predictions earn rewards from a prize pool funded by on-chain revenue.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+![MuskMarket Banner](/public/musk-logo.jpg)
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+- **Live Prediction Markets:** Real-time rounds with dynamic voting windows.
+- **On-Chain Verification:** Voting eligibility is verified against your Solana wallet's $MUX balance.
+- **Automatic Winner Detection:** Backend integration with X (via IFTTT/Webhooks) to instantly detect winners.
+- **Automated Payouts:** Rewards are automatically calculated and queued for distribution to winners.
+- **Global Leaderboard:** Track the top earners and most accurate predictors in the community.
+- **Player Profiles:** Detailed statistics, achievement badges, and activity history for every player.
 
-**Use Lovable**
+## 🛠️ Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **Frontend:** React, Vite, TypeScript, Tailwind CSS, Shadcn UI, Framer Motion.
+- **Backend:** Supabase (Edge Functions, PostgreSQL, Realtime, RLS).
+- **Blockchain:** Solana (Web3.js, Wallet Adapter).
+- **Ingestion:** IFTTT Webhooks / Custom Tweet Pollers.
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js (v18+)
+- Supabase CLI
+- A Solana Wallet (e.g., Phantom)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Frontend Setup
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/muskmarket.git
+   cd muskmarket
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Configure environment variables:
+   Copy `.env.example` to `.env` and fill in your Supabase credentials.
+4. Start development server:
+   ```bash
+   npm run dev
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Backend Setup (Supabase)
+1. Initialize Supabase:
+   ```bash
+   supabase init
+   ```
+2. Apply migrations:
+   ```bash
+   supabase migration up
+   ```
+3. Deploy Edge Functions:
+   ```bash
+   supabase functions deploy detect-winner
+   // Repeat for other functions in supabase/functions
+   ```
+4. Set required secrets:
+   ```bash
+   supabase secrets set IFTTT_TIMEZONE_OFFSET=6
+   ```
 
-Follow these steps:
+## 🎮 How to Play
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. **Connect Wallet:** Link your Solana wallet to the platform.
+2. **Hold $MUX:** Ensure you meet the minimum token requirement to be eligible for voting.
+3. **Cast Prediction:** Select your predicted category before the voting window closes.
+4. **Wait for Post:** Once the monitoring window starts, the system scans for Elon's next post.
+5. **Win SOL:** If your category is mentioned first, you win! Rewards are sent automatically.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛡️ Security
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **RLS Policies:** All database access is secured via Row Level Security.
+- **Vault Architecture:** Private keys for reward distribution are stored in a secure, external vault environment.
+- **Balance Verification:** Token balances are verified directly on the Solana mainnet before every vote.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## 📜 License
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

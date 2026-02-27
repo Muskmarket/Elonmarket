@@ -100,27 +100,6 @@ Deno.serve(async (req) => {
     const vaultPassword = Deno.env.get("VAULT_PASSWORD");
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get game config for cooldown
-    const { data: gameConfig } = await supabase
-      .from("game_config")
-      .select("cooldown_minutes")
-      .limit(1)
-      .single();
-
-    const cooldownMinutes = gameConfig?.cooldown_minutes || 30;
-
-    // Check for rounds in cooldown that are ready for winner detection
-    const { data: cooldownRound } = await supabase
-      .from("prediction_rounds")
-      .select("*, prediction_options(*)")
-      .eq("status", "cooldown")
-      .lte("cooldown_end_time", new Date().toISOString())
-      .single();
-
-    if (cooldownRound) {
-      return await processWinnerDetection(supabase, cooldownRound, lovableApiKey, vaultUrl, vaultPassword, corsHeaders);
-    }
-
     // Check for open rounds where prediction time has ended
     const { data: openRound } = await supabase
       .from("prediction_rounds")
@@ -137,28 +116,9 @@ Deno.serve(async (req) => {
     const now = new Date();
     const endTime = new Date(openRound.end_time);
 
-    // If round has ended (prediction end time passed), transition to cooldown
+    // If round has ended (prediction end time passed), process immediately
     if (now >= endTime) {
-      const cooldownEndTime = new Date(now.getTime() + cooldownMinutes * 60 * 1000);
-
-      await supabase
-        .from("prediction_rounds")
-        .update({
-          status: "cooldown",
-          cooldown_end_time: cooldownEndTime.toISOString(),
-        })
-        .eq("id", openRound.id);
-
-      return new Response(
-        JSON.stringify({
-          status: "cooldown_started",
-          message: `Prediction window ended. Winner will be revealed after ${cooldownMinutes} minute cooldown.`,
-          cooldown_end_time: cooldownEndTime.toISOString(),
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return await processWinnerDetection(supabase, openRound, lovableApiKey, vaultUrl, vaultPassword, corsHeaders);
     }
 
     // Check if we're within the prediction time frame and should scan tweets

@@ -1,7 +1,7 @@
+import React, { useState, useEffect, useCallback } from "react";
 import { ExternalLink, RefreshCw, Sparkles, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useCallback } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTweets, Tweet } from "@/hooks/useTweets";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,11 +11,27 @@ import { supabase } from "@/integrations/supabase/client";
 const optionColors: Record<string, string> = {
   Tesla: "bg-red-500/20 text-red-400 border-red-500/40 shadow-red-500/10",
   Grok: "bg-purple-500/20 text-purple-400 border-purple-500/40 shadow-purple-500/10",
+  "AI/Grok": "bg-purple-500/20 text-purple-400 border-purple-500/40 shadow-purple-500/10",
   SpaceX: "bg-blue-500/20 text-blue-400 border-blue-500/40 shadow-blue-500/10",
   X: "bg-foreground/10 text-foreground border-foreground/20",
   Doge: "bg-yellow-500/20 text-yellow-400 border-yellow-500/40 shadow-yellow-500/10",
+  Dogecoin: "bg-yellow-500/20 text-yellow-400 border-yellow-500/40 shadow-yellow-500/10",
   Grokpedia: "bg-cyan-500/20 text-cyan-400 border-cyan-500/40 shadow-cyan-500/10",
   Starlink: "bg-sky-500/20 text-sky-400 border-sky-500/40 shadow-sky-500/10",
+  Meme: "bg-green-500/20 text-green-400 border-green-500/40 shadow-green-500/10",
+};
+
+const optionIcons: Record<string, string> = {
+  Tesla: "/tesla-logo.png",
+  SpaceX: "/spacex-logo.png",
+  Dogecoin: "/doge-logo.png",
+  Doge: "/doge-logo.png",
+  "AI/Grok": "/grok-logo.png",
+  Grok: "/grok-logo.png",
+  Meme: "/doge-logo.png",
+  X: "/x-logo.png",
+  Grokpedia: "/grok-logo.png",
+  Starlink: "/spacex-logo.png",
 };
 
 const detectMatchingOptions = (text: string, options: string[]): string[] => {
@@ -52,7 +68,7 @@ const detectMatchingOptions = (text: string, options: string[]): string[] => {
   return matches;
 };
 
-const TweetCard = ({ tweet, index, predictionOptions }: { tweet: Tweet; index: number; predictionOptions: string[] }) => {
+const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet: Tweet; index: number; predictionOptions: string[] }, ref: React.ForwardedRef<HTMLDivElement>) => {
   const matchingOptions = detectMatchingOptions(tweet.text, predictionOptions);
   const hasMatch = matchingOptions.length > 0;
   const postDate = new Date(tweet.created_at_twitter);
@@ -87,6 +103,7 @@ const TweetCard = ({ tweet, index, predictionOptions }: { tweet: Tweet; index: n
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.3 }}
@@ -129,8 +146,11 @@ const TweetCard = ({ tweet, index, predictionOptions }: { tweet: Tweet; index: n
                 {matchingOptions.map((option) => (
                   <span
                     key={option}
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium border ${optionColors[option] || "bg-primary/20 text-primary border-primary/40"}`}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${optionColors[option] || "bg-primary/20 text-primary border-primary/40"}`}
                   >
+                    {optionIcons[option] && (
+                      <img src={optionIcons[option]} alt="" className="w-3 h-3 object-contain" />
+                    )}
                     {option}
                   </span>
                 ))}
@@ -147,7 +167,9 @@ const TweetCard = ({ tweet, index, predictionOptions }: { tweet: Tweet; index: n
       </Card>
     </motion.div>
   );
-};
+});
+
+TweetCard.displayName = "TweetCard";
 
 export const LiveFeed = () => {
   const { tweets, loading, refetch } = useTweets();

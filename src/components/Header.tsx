@@ -34,13 +34,10 @@ export const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-green to-neon-cyan flex items-center justify-center">
-              <Target className="w-4 h-4 text-background" />
+          <Link to="/" className="flex items-center group">
+            <div className="h-10 md:h-12 overflow-hidden flex items-center justify-center transition-transform duration-200 group-hover:scale-[1.02]">
+              <img src="/musk-logo.jpg" alt="Musk Market" className="h-full w-auto object-contain" />
             </div>
-            <h1 className="font-display font-semibold text-base text-foreground">
-              MUSKMARKET
-            </h1>
           </Link>
 
           {/* Stats - Desktop */}
@@ -159,6 +156,16 @@ export const Header = () => {
                 >
                   <Shield className="w-3 h-3" />
                   Admin
+                </Link>
+              )}
+              {user && (
+                <Link
+                  to="/profile"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <UserIcon className="w-3 h-3" />
+                  Profile
                 </Link>
               )}
               {user ? (

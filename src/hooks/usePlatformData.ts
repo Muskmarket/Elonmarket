@@ -39,10 +39,20 @@ export function usePlatformData() {
   const [platformConfig, setPlatformConfig] = useState<PlatformConfig | null>(null);
   const [payoutStats, setPayoutStats] = useState<PayoutStats | null>(null);
   const [walletBalances, setWalletBalances] = useState<WalletBalances | null>(null);
+  const [playerCount, setPlayerCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
+      // Fetch player count
+      const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+      
+      if (count !== null) {
+        setPlayerCount(count);
+      }
+
       // Fetch wallet config
       const { data: wallet } = await supabase
         .from("wallet_config")
@@ -124,5 +134,5 @@ export function usePlatformData() {
     };
   }, [fetchData]);
 
-  return { walletConfig, platformConfig, payoutStats, walletBalances, loading, refetch: fetchData };
+  return { walletConfig, platformConfig, payoutStats, walletBalances, playerCount, loading, refetch: fetchData };
 }

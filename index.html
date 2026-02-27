@@ -21,6 +21,13 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      // Early polyfills for library compatibility
+      window.global = window;
+      if (typeof window.Buffer === 'undefined') {
+        window.Buffer = { isBuffer: () => false }; // Minimal placeholder until main.tsx loads
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

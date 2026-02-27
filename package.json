@@ -1,5 +1,5 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "muskmarket",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -51,6 +51,7 @@
     "@supabase/supabase-js": "^2.93.3",
     "@tanstack/react-query": "^5.83.0",
     "bs58": "^6.0.0",
+    "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
