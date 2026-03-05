@@ -103,7 +103,7 @@ export const HeroSection = () => {
               { icon: Users, label: "Players", value: playerCount.toLocaleString(), color: "text-neon-cyan" },
               { icon: TrendingUp, label: "Predictions", value: (payoutStats?.total_predictions_made || 0).toLocaleString(), color: "text-neon-green" },
               { icon: DollarSign, label: "Total Paid", value: `$${(payoutStats?.total_paid_usd || 0).toLocaleString()}`, color: "text-neon-purple" },
-              { icon: Zap, label: "Rounds", value: (payoutStats?.total_rounds_completed || 0).toString(), color: "text-neon-orange" },
+              { icon: Zap, label: "Rounds", value: (currentRound?.round_number || payoutStats?.total_rounds_completed || 0).toString(), color: "text-neon-orange" },
             ].map((stat) => (
               <div key={stat.label} className="bg-card/60 border border-border p-4 rounded-xl hover:border-border/80 transition-colors">
                 <stat.icon className={`w-5 h-5 ${stat.color} mx-auto mb-2`} />
