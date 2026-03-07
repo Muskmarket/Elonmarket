@@ -135,6 +135,7 @@ Deno.serve(async (req) => {
 
     const tweetRecord = {
       tweet_id: tweetId,
+      tweet_url: tweetUrl,
       text: tweetText,
       author_id: authorId,
       author_username: authorUsername,

@@ -8,6 +8,7 @@ const RETRY_DELAYS = [2000, 4000, 8000]; // Exponential backoff
 export interface Tweet {
   id: string;
   tweet_id: string;
+  tweet_url?: string;
   text: string;
   author_id: string;
   author_username: string;

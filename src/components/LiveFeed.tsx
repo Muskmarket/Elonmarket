@@ -158,6 +158,12 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
     ? cleanText.slice(0, 180).trim() + "…"
     : cleanText;
 
+  const tweetUrl =
+    tweet.tweet_url ||
+    (tweet.author_username && tweet.tweet_id
+      ? `https://x.com/${tweet.author_username}/status/${tweet.tweet_id}`
+      : undefined);
+
   return (
     <motion.div
       ref={ref}
@@ -170,6 +176,14 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
         className={`relative bg-card/60 border-border hover:bg-card/80 transition-all duration-300 p-4 overflow-hidden h-full flex flex-col ${
           hasMatch ? "ring-1 ring-neon-green/30" : ""
         }`}
+        {...(tweetUrl
+          ? {
+              onClick: () => window.open(tweetUrl, "_blank", "noopener,noreferrer"),
+              className: `relative bg-card/60 border-border hover:bg-card/80 transition-all duration-300 p-4 overflow-hidden h-full flex flex-col ${
+                hasMatch ? "ring-1 ring-neon-green/30" : ""
+              } cursor-pointer`,
+            }
+          : {})}
       >
         {hasMatch && (
           <div className="absolute inset-0 bg-gradient-to-br from-neon-green/5 to-transparent pointer-events-none" />
