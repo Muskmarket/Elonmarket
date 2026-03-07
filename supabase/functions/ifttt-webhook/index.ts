@@ -61,24 +61,24 @@ Deno.serve(async (req) => {
       console.log("Treating retweet as repost:", tweetText.slice(0, 120));
     }
 
-    // ── Filter out replies (not posts that happen to start with @) ──
-    // IMPORTANT: Tweets starting with @ (like "@Tesla is working hard") are often
-    // standalone posts mentioning companies, not replies. Accept them even if marked as replies.
     const trimmedText = tweetText.trim();
     const startsWithMention = /^@\w+/i.test(trimmedText);
     const isReply =
       body.in_reply_to_status_id && body.in_reply_to_status_id !== "";
 
-    // If it starts with @, it's considered a "mention-post" which counts as a prediction option match.
-    // We accept it even if it's technicaly a reply because Elon often uses @company to start a post.
-    if (startsWithMention) {
-      console.log("Accepting tweet starting with @ mention (treating as post):", tweetText.slice(0, 80));
-    } else if (isReply) {
-      console.log("Skipping standard reply:", tweetText.slice(0, 80));
+    // Client does not want replies in the game feed at all
+    if (isReply) {
+      console.log("Skipping reply (in_reply_to_status_id set):", tweetText.slice(0, 80));
       return new Response(
         JSON.stringify({ success: true, skipped: true, reason: "reply" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Tweets that start with @ but are not replies (no in_reply_to_status_id)
+    // are treated as standalone posts (e.g. "@Tesla is working hard").
+    if (startsWithMention) {
+      console.log("Accepting tweet starting with @ mention (non-reply):", tweetText.slice(0, 80));
     }
 
     // ── Build tweet record ─────────────────────────────
