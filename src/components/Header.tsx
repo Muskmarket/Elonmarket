@@ -58,8 +58,12 @@ export const Header = () => {
 
           {/* Navigation - Desktop */}
           <nav className="hidden md:flex items-center gap-6">
+            
             <a href="#feed" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Feed
+            </a>
+            <a href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Docs
             </a>
             <a href="#predict" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Markets
@@ -67,6 +71,7 @@ export const Header = () => {
             <a href="#leaderboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Leaderboard
             </a>
+            
             {isAdmin && (
               <Link
                 to="/admin65131200"

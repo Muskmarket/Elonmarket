@@ -247,7 +247,7 @@ const Docs = () => {
                     <span className="text-muted-foreground font-mono">threshold_check()</span>
                     <span className="text-neon-green font-bold">PASSED</span>
                   </div>
-                  <p className="text-xs font-mono text-white/80">Requirement: <span className="text-neon-cyan">10,000 $MUX</span></p>
+                  <p className="text-xs font-mono text-white/80">Requirement: <span className="text-neon-cyan">100,000 $MUX</span></p>
                 </div>
               </div>
 
@@ -423,16 +423,16 @@ const Docs = () => {
                       <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4 text-center">Peak Activity</h4>
                       <div className="space-y-4">
                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-muted-foreground">1 PM – 4 PM</span>
-                            <Badge className="bg-neon-cyan/10 text-neon-cyan">HIGH</Badge>
+                            <span className="text-xs text-muted-foreground">11 AM – 3 PM UTC</span>
+                            <Badge className="bg-neon-purple/20 text-neon-purple border-neon-purple/30">VERY HIGH</Badge>
                          </div>
                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-muted-foreground">7 PM – 11 PM</span>
-                            <Badge className="bg-neon-purple/20 text-neon-purple border-neon-purple/30">MAXIMUM</Badge>
+                            <span className="text-xs text-muted-foreground">5 PM – 8 PM UTC</span>
+                            <Badge className="bg-neon-cyan/10 text-neon-cyan">HIGH</Badge>
                          </div>
                          <div className="flex justify-between items-center opacity-50">
-                            <span className="text-xs text-muted-foreground">1 AM – 3 AM</span>
-                            <Badge variant="outline">LOW</Badge>
+                            <span className="text-xs text-muted-foreground">1 AM – 4 AM UTC</span>
+                            <Badge variant="outline">MEDIUM</Badge>
                          </div>
                       </div>
                    </div>

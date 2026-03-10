@@ -72,7 +72,7 @@ export const HeroSection = () => {
 
           {/* Main Title */}
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-slide-up tracking-tight text-white" style={{ animationDelay: "0.1s" }}>
-            MUSK MARKET
+            MUSKMARKET
           </h1>
 
           <p className="text-lg md:text-xl text-foreground/90 mb-3 animate-slide-up font-medium" style={{ animationDelay: "0.2s" }}>

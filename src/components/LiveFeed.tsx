@@ -30,8 +30,9 @@ const optionIcons: Record<string, string> = {
   Grok: "/grok-logo.png",
   Meme: "/doge-logo.png",
   X: "/x-logo.png",
-  Grokpedia: "/grok-logo.png",
-  Starlink: "/spacex-logo.png",
+  Grokpedia: "/grokpedia.png",
+  Starlink: "/starlink-logo.png",
+  Gork: "/gork.png"
 };
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

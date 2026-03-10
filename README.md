@@ -29,7 +29,7 @@ Users register by submitting a **Username** and a **Solana Wallet Address**.
 - Your identity is tied directly to your provided wallet and chosen username.
 
 ### 2️⃣ Token Eligibility ($MUX Requirement)
-To participate, users must hold a minimum threshold of $MUX tokens (e.g., 10,000 $MUX). Our backend verifies your on-chain balance before allowing any predictions to be placed.
+To participate, users must hold a minimum threshold of $MUX tokens (e.g., 100,000 $MUX). Our backend verifies your on-chain balance before allowing any predictions to be placed.
 
 ### 3️⃣ Prediction Window
 Each round has a specific time window (e.g., 1:00 PM – 3:00 PM UTC). Users must cast their votes before the window opens or before the **Vote Lock** period begins.

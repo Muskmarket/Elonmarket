@@ -1,4 +1,4 @@
-import { Trophy, ChevronRight, Wallet, RefreshCw } from "lucide-react";
+import { Trophy, ChevronRight, Wallet, RefreshCw, Gem } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { usePlatformData } from "@/hooks/usePlatformData";
@@ -33,7 +33,8 @@ export const MuskMarket = () => {
             <Card className="bg-card border-border">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center justify-between text-base">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 font-display">
+                    <Gem className="w-4 h-4 text-neon-green" />
                     <span>Reward Pool</span>
                     <span className="inline-flex items-center gap-1 text-[10px] font-normal text-neon-green bg-neon-green/10 px-1.5 py-0.5 rounded-full">
                       <span className="w-1.5 h-1.5 bg-neon-green rounded-full animate-pulse" />

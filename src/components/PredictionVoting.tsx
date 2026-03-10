@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Clock, Trophy, Users, Lock, CheckCircle, AlertCircle, Timer, Shield, User as UserIcon } from "lucide-react";
+import { Clock, Trophy, Users, Lock, CheckCircle, AlertCircle, Timer, Shield, User as UserIcon, Gem, Gift } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -22,8 +22,9 @@ const optionIcons: Record<string, string> = {
   Grok: "/grok-logo.png",
   Meme: "/doge-logo.png", // Using doge as a proxy for meme
   X: "/x-logo.png",
-  Grokpedia: "/grok-logo.png", // Using grok as a proxy
+  Grokpedia: "/grokpedia.png", // Using grok as a proxy
   Starlink: "/starlink-logo.png",
+  Gork: "/gork.png"
 };
 
 const optionColors: Record<string, string> = {
@@ -353,19 +354,16 @@ export const PredictionVoting = () => {
           {/* Reward Info Card */}
           <div className="space-y-6">
             <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Trophy className="w-4 h-4 text-neon-green" />
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base font-display">
+                  <Gem className="w-4 h-4 text-neon-green" />
                   Reward Pool
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    <Shield className="w-3 h-3 inline mr-1" />
-                    Secured SOL
-                  </p>
-                  <p className="font-display text-2xl font-semibold text-neon-green">
+                  <p className="text-xs text-muted-foreground mb-1">Vault Balance</p>
+                  <p className="font-display text-2xl font-semibold text-neon-green tracking-tight">
                     {vaultBalance.toFixed(4)} SOL
                   </p>
                 </div>
@@ -373,9 +371,16 @@ export const PredictionVoting = () => {
                 <div className="h-px bg-border" />
 
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">This Round ({payoutPercentage}%)</p>
-                  <p className="font-display text-xl font-semibold text-neon-cyan">
+                  <p className="text-xs text-muted-foreground mb-1">This Round ({payoutPercentage}%)</p>
+                  <p className="font-display text-xl font-semibold text-neon-cyan tracking-tight">
                     {currentPayout.toFixed(4)} SOL
+                  </p>
+                </div>
+
+                <div className="mt-4 p-2.5 rounded-lg bg-muted/30 border border-border/50 flex items-start gap-2.5">
+                  <Gift className="w-3.5 h-3.5 text-neon-orange shrink-0 mt-0.5" />
+                  <p className="text-[10px] leading-relaxed text-muted-foreground">
+                    Rewards are sent automatically to winner wallets after each round. No claiming needed!
                   </p>
                 </div>
               </CardContent>
