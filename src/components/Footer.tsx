@@ -9,7 +9,7 @@ export const Footer = () => {
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-12 md:h-16 overflow-hidden flex items-center justify-center transition-transform duration-200 group-hover:scale-[1.02]">
-              <img src="/musk-logo.png" alt="Musk Market" className="h-full w-auto object-contain" />
+              <img src="/musk-logo.png" alt="Elonmarket" className="h-full w-auto object-contain" />
             </div>
             </div>
             <p className="text-muted-foreground text-sm max-w-xs">
@@ -39,7 +39,7 @@ export const Footer = () => {
 
         <div className="flex flex-col md:flex-row items-center justify-between pt-6 border-t border-border">
           <p className="text-xs text-muted-foreground mb-4 md:mb-0">
-            © 2026 MUSKMARKET. Not affiliated with Elon Musk or X Corp.
+            © 2026 ELONMARKET. Not affiliated with Elon Musk or X Corp.
           </p>
           <div className="flex items-center gap-4">
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
