@@ -15,7 +15,7 @@ Follow these steps to set up the MuskMarket project locally for development.
 1. **Clone the Repository:**
    ```bash
    git clone https://github.com/your-username/muskmarket.git
-   cd muskmarket
+   cd elonmarket
    ```
 
 2. **Install Dependencies:**
@@ -80,12 +80,12 @@ The scraper runs as a background process to monitor Elon's posts.
 
 3. **Start Watcher:**
    ```bash
-   pm2 start watcher-complete.mjs --name "musk-watcher"
+   pm2 start watcher-complete.mjs --name "elon-watcher"
    ```
 
 4. **Monitor Logs:**
    ```bash
-   pm2 logs musk-watcher
+   pm2 logs elon-watcher
    ```
 
 ---
