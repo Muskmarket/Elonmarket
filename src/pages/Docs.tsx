@@ -219,7 +219,7 @@ const Docs = () => {
             {/* Workflow Section */}
             <section id="workflow" className="mb-20 scroll-mt-28">
               <h2 className="text-3xl font-display font-bold mb-4">Game Flow</h2>
-              <p className="text-muted-foreground mb-10">The standard lifecycle of a user on MuskMarket.</p>
+              <p className="text-muted-foreground mb-10">The standard lifecycle of a user on Elonmarket.</p>
 
               <div id="registration" className="mb-12 scroll-mt-28">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -241,7 +241,7 @@ const Docs = () => {
                   <Lock className="w-5 h-5" />
                   2. Token Eligibility ($EMARKET)
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">To ensure high-quality participation and project sustainability, users must hold a minimum threshold of <strong>$MUX tokens</strong>.</p>
+                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">To ensure high-quality participation and project sustainability, users must hold a minimum threshold of <strong>$EMARKET tokens</strong>.</p>
                 <div className="bg-black/40 rounded-xl p-4 border border-white/5 space-y-2">
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground font-mono">threshold_check()</span>
@@ -337,7 +337,7 @@ const Docs = () => {
               <div id="distribution" className="mb-12 scroll-mt-28">
                 <h3 className="text-xl font-bold mb-4">Automated SOL Distribution</h3>
                 <p className="text-muted-foreground mb-6 leading-relaxed">
-                  Elonmarlet uses an <strong>Automated Payout Engine</strong>. Once a winner is resolved, the system calculates the payout and broadcasts the transactions to the Solana network.
+                  Elonmarket uses an <strong>Automated Payout Engine</strong>. Once a winner is resolved, the system calculates the payout and broadcasts the transactions to the Solana network.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl border border-border bg-card">
@@ -513,7 +513,7 @@ const Docs = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/50">
-                       <tr><td className="px-6 py-4 font-bold">Eligibility</td><td className="px-6 py-4 text-muted-foreground">Username + $MUX Token Holding</td></tr>
+                       <tr><td className="px-6 py-4 font-bold">Eligibility</td><td className="px-6 py-4 text-muted-foreground">Username + $EMARKET Token Holding</td></tr>
                        <tr><td className="px-6 py-4 font-bold">Voting</td><td className="px-6 py-4 text-muted-foreground">Max 1 vote per round per user</td></tr>
                        <tr><td className="px-6 py-4 font-bold">Payouts</td><td className="px-6 py-4 text-muted-foreground">10% - 20% of vault per round</td></tr>
                        <tr><td className="px-6 py-4 font-bold">Claiming</td><td className="px-6 py-4 text-muted-foreground">Not required (Fully Automated)</td></tr>
