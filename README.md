@@ -28,7 +28,7 @@ Users register by submitting a **Username** and a **Solana Wallet Address**.
 - No email. No password. No wallet signature.
 - Your identity is tied directly to your provided wallet and chosen username.
 
-### 2️⃣ Token Eligibility ($MUX Requirement)
+### 2️⃣ Token Eligibility ($EMARKET Requirement)
 To participate, users must hold a minimum threshold of $EMARKET tokens (e.g., 20,000 $EMARKET). Our backend verifies your on-chain balance before allowing any predictions to be placed.
 
 ### 3️⃣ Prediction Window
