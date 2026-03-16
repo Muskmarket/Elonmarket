@@ -72,7 +72,7 @@ export const HeroSection = () => {
 
           {/* Main Title */}
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-slide-up tracking-tight text-white" style={{ animationDelay: "0.1s" }}>
-            MUSKMARKET
+            ELONMARKET
           </h1>
 
           <p className="text-lg md:text-xl text-foreground/90 mb-3 animate-slide-up font-medium" style={{ animationDelay: "0.2s" }}>
@@ -81,7 +81,7 @@ export const HeroSection = () => {
 
           <p className="text-base text-muted-foreground mb-8 max-w-xl mx-auto animate-slide-up" style={{ animationDelay: "0.3s" }}>
             Free-to-play prediction market powered by Solana. 
-            Hold $MUX tokens, make predictions, earn rewards.
+            Hold $EMARKET tokens, make predictions, earn rewards.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-slide-up" style={{ animationDelay: "0.4s" }}>
@@ -93,7 +93,7 @@ export const HeroSection = () => {
             </Button>
             <Button variant="outline" size="lg" className="group min-w-[200px] border-white/20 hover:bg-white/5 transition-all hover:scale-105 active:scale-95">
               <TrendingUp className="w-4 h-4 mr-2" />
-              Buy $MUX
+              Buy $EMARKET
             </Button>
           </div>
 
