@@ -12,7 +12,7 @@ const topPredictors = [
   { rank: 5, address: "0x7q8r...9s0t", wins: 498, earnings: "$54,100", badge: "⭐" },
 ];
 
-export const MuskMarket = () => {
+export const Elonmarket = () => {
   const { payoutStats } = usePlatformData();
   const { data: onchain, loading, refetch } = useOnchainData();
 
@@ -66,7 +66,7 @@ export const MuskMarket = () => {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Total Paid</p>
+                    <p className="text-xs text-muted-foreground mb-1">Total SOL Paid</p>
                     <p className="font-display text-2xl font-semibold text-foreground">
                       ${totalPaidUSD.toLocaleString()}
                     </p>
