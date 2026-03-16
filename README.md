@@ -1,6 +1,6 @@
-# 🚀 MuskMarket: Free-to-Play Elon Prediction Market (SOL Rewards)
+# 🚀 Elonmarket: Free-to-Play Elon Prediction Market (SOL Rewards)
 
-MuskMarket is a decentralized, free-to-play prediction marketplace where users predict what Elon Musk will post first next on X. Will it be about Grok, Starlink, Tesla, or X? Winners automatically receive SOL rewards directly in their wallets—no manual claims, no gas interactions, and no complex wallet connections.
+Elonmarket is a decentralized, free-to-play prediction marketplace where users predict what Elon Musk will post first next on X. Will it be about Grok, Starlink, Tesla, or X? Winners automatically receive SOL rewards directly in their wallets—no manual claims, no gas interactions, and no complex wallet connections.
 
 
 **Simple. Transparent. Automated.**
@@ -13,7 +13,7 @@ MuskMarket is a decentralized, free-to-play prediction marketplace where users p
 - 💰 **Win SOL automatically:** Rewards are sent directly to your registered wallet.
 - 🔌 **No wallet connection required:** Participate using just your username and wallet address.
 - 👤 **Unified Identity:** Your Username + Wallet Address = Your Account.
-- 🔐 **Token-Gated Participation:** Hold $MUX tokens to unlock voting eligibility.
+- 🔐 **Token-Gated Participation:** Hold $EMARKET tokens to unlock voting eligibility.
 - ⚡ **Real-Time Streaming:** Watch Elon's posts appear live via our high-speed monitoring engine.
 - 🤖 **Automated Reward Engine:** Instant winner detection and distribution.
 - 🏆 **Global Leaderboard:** Track your rank against the world's best predictors.
@@ -29,7 +29,7 @@ Users register by submitting a **Username** and a **Solana Wallet Address**.
 - Your identity is tied directly to your provided wallet and chosen username.
 
 ### 2️⃣ Token Eligibility ($MUX Requirement)
-To participate, users must hold a minimum threshold of $MUX tokens (e.g., 100,000 $MUX). Our backend verifies your on-chain balance before allowing any predictions to be placed.
+To participate, users must hold a minimum threshold of $EMARKET tokens (e.g., 20,000 $EMARKET). Our backend verifies your on-chain balance before allowing any predictions to be placed.
 
 ### 3️⃣ Prediction Window
 Each round has a specific time window (e.g., 1:00 PM – 3:00 PM UTC). Users must cast their votes before the window opens or before the **Vote Lock** period begins.
