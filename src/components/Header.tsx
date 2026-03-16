@@ -36,14 +36,14 @@ export const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center group">
             <div className="h-12 md:h-16 overflow-hidden flex items-center justify-center transition-transform duration-200 group-hover:scale-[1.02]">
-              <img src="/musk-logo.png" alt="Musk Market" className="h-full w-auto object-contain" />
+              <img src="/musk-logo.png" alt="Elonmarket" className="h-full w-auto object-contain" />
             </div>
           </Link>
 
           {/* Stats - Desktop */}
           <div className="hidden lg:flex items-center gap-6">
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">Total Paid</p>
+              <p className="text-xs text-muted-foreground">Total SOL Paid</p>
               <p className="font-display font-semibold text-neon-green text-sm">
                 {(payoutStats?.total_paid_usd || 0).toLocaleString()}
               </p>
