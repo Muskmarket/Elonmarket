@@ -139,12 +139,10 @@ export const PredictionVoting = () => {
 
   const totalVotes = options.reduce((sum, opt) => sum + opt.vote_count, 0);
 
-  // Calculate current payout from live vault balance
+  // Calculate current payout from live vault balance (no accumulation)
   const vaultBalance = walletBalances?.vault_balance_sol || 0;
   const payoutPercentage = walletConfig?.payout_percentage || 20;
-  const accumulation = Number(currentRound?.accumulated_from_previous || 0);
-  const basePayout = (vaultBalance * payoutPercentage) / 100;
-  const currentPayout = basePayout + accumulation;
+  const currentPayout = (vaultBalance * payoutPercentage) / 100;
   const isRoundOpen = currentRound?.status === "open";
   const isRoundFinalized = currentRound?.status === "finalized" || currentRound?.status === "paid" || currentRound?.status === "no_winner";
   const canVote = isRoundOpen && !isVoteLocked;
