@@ -175,7 +175,7 @@ Deno.serve(async (req) => {
     // Get wallet config from DB
     const { data: walletConfig } = await supabase
       .from("wallet_config")
-      .select("vault_wallet_address, payout_wallet_address, token_contract_address, payout_percentage")
+      .select("id, vault_wallet_address, payout_wallet_address, token_contract_address, payout_percentage")
       .single();
 
     if (!walletConfig) {
