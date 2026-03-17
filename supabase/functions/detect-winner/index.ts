@@ -264,32 +264,28 @@ async function processWinnerDetection(
 }
 
 async function handleNoWinner(supabase: any, round: any) {
-  // Get wallet config for payout percentage
-  const { data: walletConfig } = await supabase
-    .from("wallet_config")
-    .select("payout_percentage")
-    .single();
-
-  const payoutPercentage = walletConfig?.payout_percentage || 20;
-
-  // Get vault balance
-  const { data: balances } = await supabase.from("wallet_balances").select("*").single();
-  const vaultBalance = balances?.vault_balance_sol || 0;
-  
-  // Calculate potential payout (what would have been paid if there was a winner)
-  const totalPotentialPayout = vaultBalance * (payoutPercentage / 100);
-
+  // No winner = no payout, no accumulation. Simply close the round.
   await supabase
     .from("prediction_rounds")
     .update({
       status: "no_winner",
       finalized_at: new Date().toISOString(),
-      vault_balance_snapshot: vaultBalance,
-      payout_amount: totalPotentialPayout,
-      // We keep the current round's accumulated_from_previous so the NEXT round 
-      // can calculate total accumulated = (lastRound.accumulated + lastRound.payout_amount)
+      payout_amount: 0,
+      payout_per_winner: 0,
     })
     .eq("id", round.id);
+
+  // Update stats (round completed but no payout)
+  const { data: stats } = await supabase.from("payout_stats").select("*").single();
+  if (stats) {
+    await supabase
+      .from("payout_stats")
+      .update({
+        total_rounds_completed: (stats.total_rounds_completed || 0) + 1,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", stats.id);
+  }
 }
 
 async function finalizeRound(
