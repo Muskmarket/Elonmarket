@@ -18,7 +18,8 @@ export const RoundResultDialog = () => {
     roundId: string;
     roundNumber: number;
     status: string;
-    isWinner: boolean;
+    isPersonalWinner: boolean;
+    hasWinner: boolean;
     winningOptionLabel: string | null;
     payoutAmount: number;
     totalWinners: number;
@@ -40,8 +41,10 @@ export const RoundResultDialog = () => {
       const lastSeenId = localStorage.getItem(STORAGE_KEY);
       if (lastSeenId === latestRound.id) return;
 
-      let isWinner = false;
-      let winningOptionLabel = null;
+      const isNoWinner = latestRound.status === "no_winner";
+      const hasWinner = !isNoWinner && !!latestRound.winning_option_id;
+      let isPersonalWinner = false;
+      let winningOptionLabel: string | null = null;
 
       if (latestRound.winning_option_id) {
         const { data: option } = await supabase
@@ -52,7 +55,8 @@ export const RoundResultDialog = () => {
         if (option) winningOptionLabel = option.label;
       }
 
-      if (user?.id) {
+      // Check if current user (if logged in) is a winner
+      if (user?.id && hasWinner) {
         const { data: vote } = await supabase
           .from("votes")
           .select("option_id")
@@ -60,10 +64,8 @@ export const RoundResultDialog = () => {
           .eq("user_id", user.id)
           .maybeSingle();
 
-        if (vote) {
-          if (latestRound.status !== "no_winner" && vote.option_id === latestRound.winning_option_id) {
-            isWinner = true;
-          }
+        if (vote && vote.option_id === latestRound.winning_option_id) {
+          isPersonalWinner = true;
         }
       }
 
@@ -71,7 +73,8 @@ export const RoundResultDialog = () => {
         roundId: latestRound.id,
         roundNumber: latestRound.round_number,
         status: latestRound.status,
-        isWinner,
+        isPersonalWinner,
+        hasWinner,
         winningOptionLabel,
         payoutAmount: latestRound.payout_per_winner || 0,
         totalWinners: latestRound.total_winners || 0,
