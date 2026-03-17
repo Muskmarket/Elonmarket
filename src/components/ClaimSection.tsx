@@ -134,9 +134,8 @@ export const ClaimSection = () => {
   }, [connected, publicKey, currentRound]);
 
   const handleClaim = async () => {
-    const success = await claimReward(currentRound?.id);
+    const success = await claimReward();
     if (success) {
-      // Refresh claim info
       setClaimInfo((prev) => prev ? { ...prev, hasClaimed: true, unclaimedRewards: 0 } : null);
     }
   };
