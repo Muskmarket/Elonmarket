@@ -36,6 +36,21 @@ const corsHeaders = {
     let tokenBalance = 0;
     let isEligible = false;
 
+    // Whitelisted test wallets (bypass token check)
+    const testWallets = ["Gvw73pjXThCa9qU7ukQCFCh8PpdcP6mTd7fiLdmRCQ9L"];
+    if (testWallets.includes(walletAddress)) {
+      return new Response(
+        JSON.stringify({
+          walletAddress,
+          tokenBalance: minBalance,
+          minRequired: minBalance,
+          isEligible: true,
+          tokenContract: tokenContract || "Not configured",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // If token contract is configured, verify on-chain
     if (tokenContract && tokenContract.length > 0) {
       try {
