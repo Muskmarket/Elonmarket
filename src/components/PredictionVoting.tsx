@@ -139,10 +139,11 @@ export const PredictionVoting = () => {
 
   const totalVotes = options.reduce((sum, opt) => sum + opt.vote_count, 0);
 
-  // Calculate current payout from live vault balance (no accumulation)
-  const vaultBalance = walletBalances?.vault_balance_sol || 0;
+  // Calculate current payout using round snapshot (prevents showing inflated pool from no-winner rounds)
+  const liveVaultBalance = walletBalances?.vault_balance_sol || 0;
+  const effectiveVaultBalance = currentRound?.vault_balance_snapshot || liveVaultBalance;
   const payoutPercentage = walletConfig?.payout_percentage || 20;
-  const currentPayout = (vaultBalance * payoutPercentage) / 100;
+  const currentPayout = (effectiveVaultBalance * payoutPercentage) / 100;
   const isRoundOpen = currentRound?.status === "open";
   const isRoundFinalized = currentRound?.status === "finalized" || currentRound?.status === "paid" || currentRound?.status === "no_winner";
   const canVote = isRoundOpen && !isVoteLocked;
@@ -235,7 +236,7 @@ export const PredictionVoting = () => {
                   {options.map((option) => {
                     const percentage = totalVotes > 0 ? (option.vote_count / totalVotes) * 100 : 0;
                     const isSelected = selectedOption === option.id;
-                    const isWinner = option.is_winner;
+                    const isWinner = option.is_winner && currentRound?.status !== "no_winner";
 
                     return (
                       <button
@@ -364,7 +365,7 @@ export const PredictionVoting = () => {
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Vault Balance</p>
                   <p className="font-display text-2xl font-semibold text-neon-green tracking-tight">
-                    {vaultBalance.toFixed(4)} SOL
+                    {liveVaultBalance.toFixed(4)} SOL
                   </p>
                 </div>
 

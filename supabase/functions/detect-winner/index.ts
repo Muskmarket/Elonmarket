@@ -248,7 +248,7 @@ async function processWinnerDetection(
     .order("created_at_twitter", { ascending: true });
 
   if (!tweets || tweets.length === 0) {
-    await handleNoWinner(supabase, round);
+    await handleNoWinner(supabase, round, vaultUrl, vaultPassword);
     return new Response(
       JSON.stringify({
         winner_detected: false,
@@ -267,7 +267,7 @@ async function processWinnerDetection(
     }
   }
 
-  await handleNoWinner(supabase, round);
+  await handleNoWinner(supabase, round, vaultUrl, vaultPassword);
   return new Response(
     JSON.stringify({
       winner_detected: false,
@@ -278,7 +278,39 @@ async function processWinnerDetection(
   );
 }
 
-async function handleNoWinner(supabase: any, round: any) {
+async function handleNoWinner(supabase: any, round: any, vaultUrl?: string, vaultPassword?: string) {
+  // Reset is_winner on all options for this round (fixes UI showing wrong winner)
+  await supabase
+    .from("prediction_options")
+    .update({ is_winner: false })
+    .eq("round_id", round.id);
+
+  // Calculate the would-be payout so the next round can deduct it (prevents accumulation)
+  let vaultBalance = round.vault_balance_snapshot || 0;
+  if (vaultBalance === 0 && vaultUrl) {
+    try {
+      const vaultHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        "x-api-key": vaultPassword || "",
+      };
+      const balRes = await fetch(`${vaultUrl}/balance`, { headers: vaultHeaders });
+      if (balRes.ok) {
+        const balData = await balRes.json();
+        vaultBalance = balData.balance_sol || balData.balance || 0;
+      }
+    } catch (e) {
+      console.error("Failed to get vault balance for no-winner tracking:", e);
+    }
+  }
+  if (vaultBalance === 0) {
+    const { data: balances } = await supabase.from("wallet_balances").select("*").single();
+    vaultBalance = balances?.vault_balance_sol || 0;
+  }
+
+  const { data: walletConfig } = await supabase.from("wallet_config").select("payout_percentage").single();
+  const payoutPercentage = walletConfig?.payout_percentage || 20;
+  const wouldBePayout = vaultBalance * (payoutPercentage / 100);
+
   await supabase
     .from("prediction_rounds")
     .update({
@@ -288,8 +320,9 @@ async function handleNoWinner(supabase: any, round: any) {
       winning_tweet_id: null,
       winning_tweet_text: null,
       total_winners: 0,
-      payout_amount: 0,
+      payout_amount: wouldBePayout,
       payout_per_winner: 0,
+      vault_balance_snapshot: vaultBalance,
       accumulated_from_previous: 0,
       refill_completed: false,
     })
@@ -342,7 +375,7 @@ async function finalizeRound(
 
   if (winnerCount === 0) {
     console.log("Option matched but no one voted for it. Handling as no_winner.");
-    await handleNoWinner(supabase, round);
+    await handleNoWinner(supabase, round, vaultUrl, vaultPassword);
     return new Response(
       JSON.stringify({
         winner_detected: true,
@@ -360,26 +393,31 @@ async function finalizeRound(
 
   const payoutPercentage = walletConfig?.payout_percentage || 20;
 
-  let vaultBalance = 0;
-  if (vaultUrl) {
-    try {
-      const vaultHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-        "x-api-key": vaultPassword || "",
-      };
-      const balRes = await fetch(`${vaultUrl}/balance`, { headers: vaultHeaders });
-      if (balRes.ok) {
-        const balData = await balRes.json();
-        vaultBalance = balData.balance_sol || balData.balance || 0;
-      }
-    } catch (e) {
-      console.error("Failed to get vault balance:", e);
-    }
-  }
+  // Use vault balance snapshot from round creation (prevents accumulation from no-winner rounds)
+  let vaultBalance = round.vault_balance_snapshot || 0;
 
+  // If no snapshot was taken at round creation, fetch live (backwards compatibility)
   if (vaultBalance === 0) {
-    const { data: balances } = await supabase.from("wallet_balances").select("*").single();
-    vaultBalance = balances?.vault_balance_sol || 0;
+    if (vaultUrl) {
+      try {
+        const vaultHeaders: Record<string, string> = {
+          "Content-Type": "application/json",
+          "x-api-key": vaultPassword || "",
+        };
+        const balRes = await fetch(`${vaultUrl}/balance`, { headers: vaultHeaders });
+        if (balRes.ok) {
+          const balData = await balRes.json();
+          vaultBalance = balData.balance_sol || balData.balance || 0;
+        }
+      } catch (e) {
+        console.error("Failed to get vault balance:", e);
+      }
+    }
+
+    if (vaultBalance === 0) {
+      const { data: balances } = await supabase.from("wallet_balances").select("*").single();
+      vaultBalance = balances?.vault_balance_sol || 0;
+    }
   }
 
   const totalPayout = vaultBalance * (payoutPercentage / 100);

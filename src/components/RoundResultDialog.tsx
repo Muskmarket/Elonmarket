@@ -112,11 +112,16 @@ export const RoundResultDialog = () => {
   const isNoWinner = result.status === "no_winner";
   const iconToneClass = isNoWinner ? "text-neon-orange" : "text-neon-cyan";
   const glowColor = isNoWinner ? "rgba(249,115,22,0.32)" : "rgba(34,211,238,0.28)";
+  const isPaid = result.status === "paid";
   const summaryText = isNoWinner
-    ? "No matching post was detected before the round closed, so no payout was sent for this round."
+    ? "No matching post was detected before the round closed. No payout was sent and the reward pool resets for the next round."
     : result.isPersonalWinner
-      ? "You picked the winning category. Rewards are being sent automatically from the vault."
-      : `The winning category was ${result.winningOptionLabel || "Unknown"}. Automatic rewards were sent only to the correct winner wallets.`;
+      ? isPaid
+        ? "You picked the winning category! Your reward has been sent to your wallet."
+        : "You picked the winning category. Your reward is being processed..."
+      : isPaid
+        ? `The winning category was ${result.winningOptionLabel || "Unknown"}. Rewards were sent to the correct winner wallets.`
+        : `The winning category was ${result.winningOptionLabel || "Unknown"}. Rewards are being processed for winner wallets.`;
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && handleClose()}>
@@ -216,11 +221,11 @@ export const RoundResultDialog = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center justify-center gap-2 text-neon-green"
+                  className={`flex items-center justify-center gap-2 ${result.status === "paid" ? "text-neon-green" : "text-neon-orange"}`}
                 >
                   <CheckCircle2 className="w-3 h-3" />
                   <span className="text-[10px] font-bold uppercase tracking-wider">
-                    Automatic transfer sent to winners
+                    {result.status === "paid" ? "Automatic transfer sent to winners" : "Payout is being processed..."}
                   </span>
                 </motion.div>
               )}

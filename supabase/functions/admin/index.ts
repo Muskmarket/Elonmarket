@@ -139,6 +139,50 @@ Deno.serve(async (req) => {
 
         if (error) throw error;
 
+        // Snapshot the effective vault balance at round creation (prevents accumulation)
+        const vaultUrl = Deno.env.get("VAULT_URL");
+        const vaultApiKey = Deno.env.get("VAULT_PASSWORD");
+        let liveVaultBalance = 0;
+
+        if (vaultUrl) {
+          try {
+            const vaultHeaders: Record<string, string> = {
+              "Content-Type": "application/json",
+              "x-api-key": vaultApiKey || "",
+            };
+            const balRes = await fetch(`${vaultUrl}/balance`, { headers: vaultHeaders });
+            if (balRes.ok) {
+              const balData = await balRes.json();
+              liveVaultBalance = balData.balance_sol || balData.balance || 0;
+            }
+          } catch (e) {
+            console.error("Failed to snapshot vault balance:", e);
+          }
+        }
+        if (liveVaultBalance === 0) {
+          const { data: balances } = await supabase.from("wallet_balances").select("*").single();
+          liveVaultBalance = balances?.vault_balance_sol || 0;
+        }
+
+        // If previous round was no_winner, deduct its would-be payout to prevent accumulation
+        let effectiveBalance = liveVaultBalance;
+        const { data: prevRound } = await supabase
+          .from("prediction_rounds")
+          .select("status, vault_balance_snapshot, payout_amount")
+          .lt("round_number", newRoundNumber)
+          .order("round_number", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (prevRound?.status === "no_winner" && prevRound.vault_balance_snapshot) {
+          effectiveBalance = Math.max(0, (prevRound.vault_balance_snapshot || liveVaultBalance) - (prevRound.payout_amount || 0));
+        }
+
+        await supabase
+          .from("prediction_rounds")
+          .update({ vault_balance_snapshot: effectiveBalance })
+          .eq("id", newRound.id);
+
         // Add options
         if (data.options && data.options.length > 0) {
           const optionsToInsert = data.options.map((opt: any) => {
