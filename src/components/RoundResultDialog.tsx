@@ -110,11 +110,14 @@ export const RoundResultDialog = () => {
   if (!result) return null;
 
   const isNoWinner = result.status === "no_winner";
+  const hasCorrectAnswer = isNoWinner && !!result.winningOptionLabel;
   const iconToneClass = isNoWinner ? "text-neon-orange" : "text-neon-cyan";
   const glowColor = isNoWinner ? "rgba(249,115,22,0.32)" : "rgba(34,211,238,0.28)";
   const isPaid = result.status === "paid";
   const summaryText = isNoWinner
-    ? "No matching post was detected before the round closed. No payout was sent and the reward pool resets for the next round."
+    ? hasCorrectAnswer
+      ? `The correct answer was ${result.winningOptionLabel}. Nobody voted for it, so no payout was sent and the reward pool resets for the next round.`
+      : "No matching post was detected before the round closed. No payout was sent and the reward pool resets for the next round."
     : result.isPersonalWinner
       ? isPaid
         ? "You picked the winning category! Your reward has been sent to your wallet."
@@ -157,8 +160,10 @@ export const RoundResultDialog = () => {
               Round #{result.roundNumber} Complete
             </h2>
             <div className="text-2xl font-display font-bold text-white tracking-tight flex flex-wrap items-center justify-center gap-2">
-              {isNoWinner ? "No Winner" : "Winning Category:"}
-              {!isNoWinner && (
+              {isNoWinner
+                ? (hasCorrectAnswer ? "Correct Answer:" : "No Winner")
+                : "Winning Category:"}
+              {(hasCorrectAnswer || !isNoWinner) && (
                 <span className={`${iconToneClass} uppercase`}>
                   {result.winningOptionLabel || "Unknown"}
                 </span>
@@ -175,10 +180,10 @@ export const RoundResultDialog = () => {
           <div className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-6 mb-8 group relative overflow-hidden">
             <Quote className="absolute -top-2 -right-2 w-12 h-12 text-white/5 -rotate-12" />
             <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-black mb-3">
-              {isNoWinner ? "Round Summary" : "Verified Post"}
+              {isNoWinner && !hasCorrectAnswer ? "Round Summary" : "Verified Post"}
             </p>
             <p className="text-white/80 italic leading-relaxed text-base">
-              "{result.winningTweetText || (isNoWinner ? "No matching post was detected during this round." : "The round ended after a verified winning post was matched.")}"
+              "{result.winningTweetText || (isNoWinner && !hasCorrectAnswer ? "No matching post was detected during this round." : "The round ended after a verified winning post was matched.")}"
             </p>
           </div>
 

@@ -237,6 +237,7 @@ export const PredictionVoting = () => {
                     const percentage = totalVotes > 0 ? (option.vote_count / totalVotes) * 100 : 0;
                     const isSelected = selectedOption === option.id;
                     const isWinner = option.is_winner && currentRound?.status !== "no_winner";
+                    const isCorrectAnswer = option.is_winner && currentRound?.status === "no_winner";
 
                     return (
                       <button
@@ -246,6 +247,8 @@ export const PredictionVoting = () => {
                         className={`relative w-full p-3.5 rounded-lg border transition-all duration-200 text-left ${
                           isWinner
                             ? "border-neon-green bg-neon-green/5"
+                            : isCorrectAnswer
+                            ? "border-neon-orange bg-neon-orange/5"
                             : isSelected
                             ? "border-neon-cyan bg-neon-cyan/5"
                             : "border-border hover:border-border/80 bg-muted/30"
@@ -255,10 +258,10 @@ export const PredictionVoting = () => {
                           <div className="flex items-center gap-2.5">
                             {optionIcons[option.label] ? (
                               <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center border border-border/50 bg-background/50">
-                                <img 
-                                  src={optionIcons[option.label]} 
-                                  alt={option.label} 
-                                  className="w-6 h-6 object-contain" 
+                                <img
+                                  src={optionIcons[option.label]}
+                                  alt={option.label}
+                                  className="w-6 h-6 object-contain"
                                 />
                               </div>
                             ) : (
@@ -271,6 +274,12 @@ export const PredictionVoting = () => {
                               <span className="flex items-center gap-1 text-neon-green text-xs font-medium">
                                 <Trophy className="w-3.5 h-3.5" />
                                 Winner
+                              </span>
+                            )}
+                            {isCorrectAnswer && (
+                              <span className="flex items-center gap-1 text-neon-orange text-xs font-medium">
+                                <Trophy className="w-3.5 h-3.5" />
+                                Correct
                               </span>
                             )}
                             {isSelected && !isWinner && (

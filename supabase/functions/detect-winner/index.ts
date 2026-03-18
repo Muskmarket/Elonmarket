@@ -374,8 +374,56 @@ async function finalizeRound(
   const winnerCount = winners.length;
 
   if (winnerCount === 0) {
-    console.log("Option matched but no one voted for it. Handling as no_winner.");
-    await handleNoWinner(supabase, round, vaultUrl, vaultPassword);
+    console.log("Option matched but no one voted for it. Storing correct answer with no payouts.");
+
+    // Keep is_winner true on the matched option (already set above) so UI can highlight it
+    // Compute vault balance + would-be payout for tracking
+    const { data: walletConfigNW } = await supabase.from("wallet_config").select("payout_percentage").single();
+    const payoutPctNW = walletConfigNW?.payout_percentage || 20;
+
+    let vaultBalNW = round.vault_balance_snapshot || 0;
+    if (vaultBalNW === 0 && vaultUrl) {
+      try {
+        const h: Record<string, string> = { "Content-Type": "application/json", "x-api-key": vaultPassword || "" };
+        const r = await fetch(`${vaultUrl}/balance`, { headers: h });
+        if (r.ok) { const d = await r.json(); vaultBalNW = d.balance_sol || d.balance || 0; }
+      } catch (e) { console.error("Failed to get vault balance:", e); }
+    }
+    if (vaultBalNW === 0) {
+      const { data: bal } = await supabase.from("wallet_balances").select("*").single();
+      vaultBalNW = bal?.vault_balance_sol || 0;
+    }
+
+    const wouldBePayout = vaultBalNW * (payoutPctNW / 100);
+
+    await supabase
+      .from("prediction_rounds")
+      .update({
+        status: "no_winner",
+        winning_option_id: winningOption.id,
+        winning_tweet_id: tweet.tweet_id,
+        winning_tweet_text: tweet.text,
+        finalized_at: new Date().toISOString(),
+        total_winners: 0,
+        payout_amount: wouldBePayout,
+        payout_per_winner: 0,
+        vault_balance_snapshot: vaultBalNW,
+        accumulated_from_previous: 0,
+        refill_completed: false,
+      })
+      .eq("id", round.id);
+
+    const { data: statsNW } = await supabase.from("payout_stats").select("*").single();
+    if (statsNW) {
+      await supabase
+        .from("payout_stats")
+        .update({
+          total_rounds_completed: (statsNW.total_rounds_completed || 0) + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", statsNW.id);
+    }
+
     return new Response(
       JSON.stringify({
         winner_detected: true,
