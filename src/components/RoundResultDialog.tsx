@@ -116,7 +116,7 @@ export const RoundResultDialog = () => {
   const isPaid = result.status === "paid";
   const summaryText = isNoWinner
     ? hasCorrectAnswer
-      ? `The correct answer was ${result.winningOptionLabel}. Nobody voted for it, so no payout was sent and the reward pool resets for the next round.`
+      ? `The winning category was ${result.winningOptionLabel}. Nobody voted for it, so no payout was sent and the reward pool resets for the next round.`
       : "No matching post was detected before the round closed. No payout was sent and the reward pool resets for the next round."
     : result.isPersonalWinner
       ? isPaid
@@ -161,7 +161,7 @@ export const RoundResultDialog = () => {
             </h2>
             <div className="text-2xl font-display font-bold text-white tracking-tight flex flex-wrap items-center justify-center gap-2">
               {isNoWinner
-                ? (hasCorrectAnswer ? "Correct Answer:" : "No Winner")
+                ? (hasCorrectAnswer ? "Winning Category:" : "No Winner")
                 : "Winning Category:"}
               {(hasCorrectAnswer || !isNoWinner) && (
                 <span className={`${iconToneClass} uppercase`}>
