@@ -7,6 +7,11 @@ Elonmarket is a decentralized, free-to-play prediction marketplace where users p
 
 ![Elonmarket Banner](public/images/elonmarket-banner1.jpeg)
 
+---
+
+## 📊 Data-Driven Design
+Elonmarket is built on extensive analysis of Elon Musk's posting behavior. Over 75% of his activity consistently revolves around his core companies (Tesla, SpaceX, X, Grok). Our prediction windows and options are strategically aligned with peak activity periods to ensure high-engagement gameplay.
+
 ![Elonmarket Mobile](public/images/elonmarket-banner2.jpeg)
 
 ## 🌟 Core Features
