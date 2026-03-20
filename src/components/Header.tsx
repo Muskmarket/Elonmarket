@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/AuthModal";
+import headerLogo from "@/assets/elonmarket-header-logo.png";
 
 export const Header = () => {
   const { payoutStats } = usePlatformData();
@@ -34,10 +35,13 @@ export const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center group">
-            <div className="h-8 md:h-10 overflow-hidden flex items-center justify-center transition-transform duration-200 group-hover:scale-[1.02] bg-black rounded">
-              <img src="/elonmarket-logo.jpeg" alt="Elonmarket" className="h-full w-auto object-contain" />
-            </div>
+          <Link to="/" className="flex items-center group" aria-label="Elonmarket home">
+            <img
+              src={headerLogo}
+              alt="Elonmarket"
+              className="block h-8 md:h-9 w-auto object-contain opacity-95 brightness-110 contrast-125 transition-transform duration-200 group-hover:scale-[1.02]"
+              style={{ mixBlendMode: "screen" }}
+            />
           </Link>
 
           {/* Stats - Desktop */}
