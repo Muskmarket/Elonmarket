@@ -7,16 +7,9 @@ Elonmarket is a decentralized, free-to-play prediction marketplace where users p
 
 ![Elonmarket Banner](public/images/elonmarket-banner1.jpeg)
 
----
-
-## 📊 Data-Driven Design
-Elonmarket is built on extensive analysis of Elon Musk's posting behavior. Over 75% of his activity consistently revolves around his core companies (Tesla, SpaceX, X, Grok). Our prediction windows and options are strategically aligned with peak activity periods to ensure high-engagement gameplay.
-
-![Elonmarket Mobile](public/images/elonmarket-banner2.jpeg)
-
 ## 🌟 Core Features
 
-- 🔮 **Predict Elon’s X post:** Foresee the next topic in the Musk ecosystem.
+- 🔮 **Predict Elon's X post:** Foresee the next topic in the Musk ecosystem.
 - 💰 **Win SOL automatically:** Rewards are sent directly to your registered wallet.
 - 🔌 **No wallet connection required:** Participate using just your username and wallet address.
 - 👤 **Unified Identity:** Your Username + Wallet Address = Your Account.
@@ -52,7 +45,7 @@ Each round features curated options based on the Musk ecosystem:
 - **Gork / Grokpedia**
 
 ### 5️⃣ Real-Time Monitoring & Validation
-Our dedicated scraping engine monitors Elon’s X profile in real-time. A valid winning post must:
+Our dedicated scraping engine monitors Elon's X profile in real-time. A valid winning post must:
 - Be authored or reposted by Elon.
 - Appear within the prediction window.
 - Contain an exact keyword match (e.g., "Starlink" or "@Tesla").
@@ -75,7 +68,7 @@ The MuskMarket vault is funded entirely by **Creator Rewards** generated from pu
 ---
 
 ## 📊 Data-Driven Design
-Elonmarket is built on extensive analysis of Elon Musk’s posting behavior. Over 75% of his activity consistently revolves around his core companies (Tesla, SpaceX, X, Grok). Our prediction windows and options are strategically aligned with peak activity periods to ensure high-engagement gameplay.
+Elonmarket is built on extensive analysis of Elon Musk's posting behavior. Over 75% of his activity consistently revolves around his core companies (Tesla, SpaceX, X, Grok). Our prediction windows and options are strategically aligned with peak activity periods to ensure high-engagement gameplay.
 
 ---
 
@@ -96,6 +89,8 @@ Elonmarket is built on extensive analysis of Elon Musk’s posting behavior. Ove
 - [Supabase Configuration](docs/SUPABASE_SETUP.md)
 
 ---
+
+![Elonmarket Mobile](public/images/elonmarket-banner2.jpeg)
 
 ## ⚖️ License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
