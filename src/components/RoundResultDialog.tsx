@@ -16,6 +16,7 @@ export const RoundResultDialog = () => {
     roundNumber: number;
     status: string;
     isPersonalWinner: boolean;
+    userVoted: boolean;
     hasWinner: boolean;
     winningOptionLabel: string | null;
     payoutAmount: number;
@@ -55,7 +56,8 @@ export const RoundResultDialog = () => {
         }
       }
 
-      if (user?.id && hasWinner) {
+      let userVoted = false;
+      if (user?.id) {
         const { data: vote } = await supabase
           .from("votes")
           .select("option_id")
@@ -63,7 +65,10 @@ export const RoundResultDialog = () => {
           .eq("user_id", user.id)
           .maybeSingle();
 
-        isPersonalWinner = vote?.option_id === latestRound.winning_option_id;
+        userVoted = !!vote;
+        if (hasWinner && vote) {
+          isPersonalWinner = vote.option_id === latestRound.winning_option_id;
+        }
       }
 
       setResult({
@@ -71,6 +76,7 @@ export const RoundResultDialog = () => {
         roundNumber: latestRound.round_number,
         status: latestRound.status,
         isPersonalWinner,
+        userVoted,
         hasWinner,
         winningOptionLabel,
         payoutAmount: latestRound.payout_per_winner || 0,
@@ -110,13 +116,16 @@ export const RoundResultDialog = () => {
   if (!result) return null;
 
   const isNoWinner = result.status === "no_winner";
-  const iconToneClass = isNoWinner ? "text-neon-orange" : "text-neon-cyan";
-  const glowColor = isNoWinner ? "rgba(249,115,22,0.32)" : "rgba(34,211,238,0.28)";
+  const userVotedAndLost = result.userVoted && !result.isPersonalWinner && result.hasWinner;
+  const iconToneClass = isNoWinner ? "text-neon-orange" : userVotedAndLost ? "text-neon-orange" : "text-neon-cyan";
+  const glowColor = isNoWinner ? "rgba(249,115,22,0.32)" : userVotedAndLost ? "rgba(249,115,22,0.28)" : "rgba(34,211,238,0.28)";
   const summaryText = isNoWinner
     ? "No matching post was detected before the round closed, so no payout was sent for this round."
     : result.isPersonalWinner
       ? "You picked the winning category. Rewards are being sent automatically from the vault."
-      : `The winning category was ${result.winningOptionLabel || "Unknown"}. Automatic rewards were sent only to the correct winner wallets.`;
+      : userVotedAndLost
+        ? `The winning category was ${result.winningOptionLabel || "Unknown"}. Better luck next time!`
+        : `The winning category was ${result.winningOptionLabel || "Unknown"}. Automatic rewards were sent to the correct winner wallets.`;
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && handleClose()}>
@@ -141,6 +150,8 @@ export const RoundResultDialog = () => {
                 <AlertCircle className="w-10 h-10 text-neon-orange" />
               ) : result.isPersonalWinner ? (
                 <Gift className="w-10 h-10 text-neon-green" />
+              ) : userVotedAndLost ? (
+                <AlertCircle className="w-10 h-10 text-neon-orange" />
               ) : (
                 <Trophy className="w-10 h-10 text-neon-cyan" />
               )}
@@ -163,7 +174,10 @@ export const RoundResultDialog = () => {
               {summaryText}
             </p>
             {result.isPersonalWinner && !isNoWinner && (
-              <p className="text-neon-green text-sm font-bold mt-2">🎉 You predicted correctly!</p>
+              <p className="text-neon-green text-sm font-bold mt-2">You predicted correctly!</p>
+            )}
+            {userVotedAndLost && (
+              <p className="text-neon-orange text-sm font-bold mt-2">Better luck next time!</p>
             )}
           </div>
 
