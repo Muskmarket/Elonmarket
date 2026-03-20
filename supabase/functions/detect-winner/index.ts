@@ -106,10 +106,17 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-    const vaultUrl = Deno.env.get("VAULT_URL");
-    const vaultPassword = Deno.env.get("VAULT_PASSWORD");
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Load vault config from DB first, fall back to env vars
+    const { data: vaultConfig } = await supabase
+      .from("wallet_config")
+      .select("vault_api_url, vault_api_key")
+      .single();
+
+    const vaultUrl = vaultConfig?.vault_api_url || Deno.env.get("VAULT_URL");
+    const vaultPassword = vaultConfig?.vault_api_key || Deno.env.get("VAULT_PASSWORD");
+    console.log(`Vault config: url=${vaultUrl ? "set" : "missing"}, key=${vaultPassword ? "set" : "missing"}`);
 
     // Get request body for potential triggers
     const body = await req.json().catch(() => ({}));
@@ -355,19 +362,22 @@ async function finalizeRound(
 
   const { data: walletConfig } = await supabase
     .from("wallet_config")
-    .select("payout_percentage")
+    .select("payout_percentage, vault_api_url, vault_api_key")
     .single();
 
   const payoutPercentage = walletConfig?.payout_percentage || 20;
+  // Use DB vault config if available (overrides function params)
+  const effectiveVaultUrl = walletConfig?.vault_api_url || vaultUrl;
+  const effectiveVaultKey = walletConfig?.vault_api_key || vaultPassword;
 
   let vaultBalance = 0;
-  if (vaultUrl) {
+  if (effectiveVaultUrl) {
     try {
       const vaultHeaders: Record<string, string> = {
         "Content-Type": "application/json",
-        "x-api-key": vaultPassword || "",
+        "x-api-key": effectiveVaultKey || "",
       };
-      const balRes = await fetch(`${vaultUrl}/balance`, { headers: vaultHeaders });
+      const balRes = await fetch(`${effectiveVaultUrl}/balance`, { headers: vaultHeaders });
       if (balRes.ok) {
         const balData = await balRes.json();
         vaultBalance = balData.balance_sol || balData.balance || 0;
@@ -412,22 +422,24 @@ async function finalizeRound(
       })
       .eq("id", vote.user_id);
 
-    if (!vaultUrl || perWinnerPayout <= 0) {
+    if (!effectiveVaultUrl || perWinnerPayout <= 0) {
       continue;
     }
 
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        "x-api-key": vaultPassword || "",
+        "x-api-key": effectiveVaultKey || "",
       };
 
-      const res = await fetch(`${vaultUrl}/payout`, {
+      const lamports = Math.round(perWinnerPayout * 1_000_000_000);
+      const res = await fetch(`${effectiveVaultUrl}/payout`, {
         method: "POST",
         headers,
         body: JSON.stringify({
-          wallet: vote.wallet_address,
-          amount: perWinnerPayout,
+          round_id: round.id,
+          winner_wallet: vote.wallet_address,
+          lamports: lamports,
         }),
       });
 
