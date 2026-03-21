@@ -31,8 +31,9 @@ export const Footer = () => {
           <div>
             <h4 className="font-display font-medium mb-3 text-sm">Community</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Twitter/X</a></li>
-              <li><a href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">Docs</a></li> 
+              <li><a href="https://x.com/elonmarketfun" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Twitter/X</a></li>
+              <li><a href="https://github.com/muskmarket" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">GitHub</a></li>
+              <li><a href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">Docs</a></li>
             </ul>
           </div>
         </div>
@@ -42,10 +43,12 @@ export const Footer = () => {
             © 2026 ELONMARKET. Not affiliated with Elon Musk or X Corp.
           </p>
           <div className="flex items-center gap-4">
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="https://x.com/elonmarketfun" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Twitter className="w-5 h-5" />
             </a>
-            
+            <a href="https://github.com/muskmarket" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Github className="w-5 h-5" />
+            </a>
           </div>
         </div>
       </div>
