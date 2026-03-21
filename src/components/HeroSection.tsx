@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 
 export const HeroSection = () => {
   const { payoutStats, playerCount } = usePlatformData();
-  const { data: onchain } = useOnchainData();
+  const { data: onchain, refetch: refetchOnchain } = useOnchainData();
   const { currentRound } = usePredictionRound();
   const [status, setStatus] = useState<{ label: string; color: string; pulse: boolean }>({
     label: "Predictions Closed",
@@ -16,6 +16,10 @@ export const HeroSection = () => {
   });
 
   const vaultBalanceSOL = onchain?.vault.balance_sol ?? 0;
+
+  useEffect(() => {
+    refetchOnchain();
+  }, [currentRound?.status, currentRound?.id]);
 
   useEffect(() => {
     const updateStatus = () => {

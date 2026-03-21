@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { usePlatformData } from "@/hooks/usePlatformData";
 import { useOnchainData } from "@/hooks/useOnchainData";
+import { usePredictionRound } from "@/hooks/usePredictionRound";
+import { useEffect } from "react";
 
 const topPredictors = [
   { rank: 1, address: "0x1a2b...3c4d", wins: 847, earnings: "$124,200", badge: "🏆" },
@@ -15,6 +17,11 @@ const topPredictors = [
 export const Elonmarket = () => {
   const { payoutStats } = usePlatformData();
   const { data: onchain, loading, refetch } = useOnchainData();
+  const { currentRound } = usePredictionRound();
+
+  useEffect(() => {
+    refetch();
+  }, [currentRound?.status, currentRound?.id]);
 
   const vaultBalanceSOL = onchain?.vault.balance_sol ?? 0;
   const payoutBalanceSOL = onchain?.payout.balance_sol ?? 0;
