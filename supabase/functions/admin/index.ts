@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
+const SOLANA_RPC = Deno.env.get("SOLANA_RPC_URL") || "https://api.mainnet-beta.solana.com";
 
 async function getSOLBalance(address: string): Promise<number> {
   if (!address) return 0;
@@ -260,8 +260,8 @@ Deno.serve(async (req) => {
 
 
       case "vault_refresh_balance": {
-        const vaultUrl = Deno.env.get("VAULT_URL") || "http://64.176.63.197:8000";
-        const vaultApiKey = Deno.env.get("VAULT_PASSWORD") || "65131200";
+        const vaultUrl = Deno.env.get("VAULT_URL")!;
+        const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
 
         let vaultBalance = 0;
         let vaultAddress = "";
@@ -318,8 +318,8 @@ Deno.serve(async (req) => {
       }
 
       case "vault_config": {
-        const vaultUrl = Deno.env.get("VAULT_URL") || "http://64.176.63.197:8000";
-        const vaultApiKey = Deno.env.get("VAULT_PASSWORD") || "65131200";
+        const vaultUrl = Deno.env.get("VAULT_URL")!;
+        const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
 
         const headers: Record<string, string> = { 
           "Content-Type": "application/json",
@@ -339,8 +339,8 @@ Deno.serve(async (req) => {
       }
 
       case "vault_drain": {
-        const vaultUrl = Deno.env.get("VAULT_URL") || "http://64.176.63.197:8000";
-        const vaultApiKey = Deno.env.get("VAULT_PASSWORD") || "65131200";
+        const vaultUrl = Deno.env.get("VAULT_URL")!;
+        const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
 
         const headers: Record<string, string> = { 
           "Content-Type": "application/json",

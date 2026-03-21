@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
+const SOLANA_RPC = Deno.env.get("SOLANA_RPC_URL") || "https://api.mainnet-beta.solana.com";
 
 async function getSOLBalance(address: string): Promise<number> {
   if (!address) return 0;
@@ -168,8 +168,8 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const vaultUrl = Deno.env.get("VAULT_URL") || "http://64.176.63.197:8000";
-    const vaultApiKey = Deno.env.get("VAULT_PASSWORD") || "65131200";
+    const vaultUrl = Deno.env.get("VAULT_URL")!;
+    const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get wallet config from DB

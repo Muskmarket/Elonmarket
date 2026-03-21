@@ -78,7 +78,7 @@ export const Header = () => {
             
             {isAdmin && (
               <Link
-                to="/admin65131200"
+                to={`/${import.meta.env.VITE_ADMIN_ROUTE || "admin"}`}
                 className="text-sm text-neon-purple hover:text-foreground transition-colors flex items-center gap-1"
               >
                 <Shield className="w-3 h-3" />
@@ -166,7 +166,7 @@ export const Header = () => {
               </a>
               {isAdmin && (
                 <Link
-                  to="/admin65131200"
+                  to={`/${import.meta.env.VITE_ADMIN_ROUTE || "admin"}`}
                   className="text-sm text-neon-purple hover:text-foreground transition-colors flex items-center gap-1"
                   onClick={() => setMobileMenuOpen(false)}
                 >

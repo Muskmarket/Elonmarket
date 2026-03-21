@@ -29,7 +29,7 @@ const App = () => (
           >
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/admin65131200" element={<Admin />} />
+              <Route path={`/${import.meta.env.VITE_ADMIN_ROUTE || "admin"}`} element={<Admin />} />
               <Route path="/docs" element={<Docs />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
