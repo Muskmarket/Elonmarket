@@ -1,4 +1,4 @@
-import { Target, Twitter, MessageCircle, Github } from "lucide-react";
+import { Target, MessageCircle, Github } from "lucide-react";
 
 export const Footer = () => {
   return (
