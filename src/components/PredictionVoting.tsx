@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { usePredictionRound, PredictionOption } from "@/hooks/usePredictionRound";
 import { usePlatformData } from "@/hooks/usePlatformData";
+import { useOnchainData } from "@/hooks/useOnchainData";
 import { useVoting } from "@/hooks/useVoting";
 import { useTokenVerification } from "@/hooks/useTokenVerification";
 import { useHasVoted } from "@/hooks/useHasVoted";
@@ -42,7 +43,8 @@ const optionColors: Record<string, string> = {
 
 export const PredictionVoting = () => {
   const { currentRound, options, refetch } = usePredictionRound();
-  const { walletConfig, walletBalances } = usePlatformData();
+  const { walletConfig } = usePlatformData();
+  const { data: onchain } = useOnchainData();
   const { submitVote, loading: voteLoading } = useVoting();
   const { balance, verifyTokenBalance, loading: tokenLoading } = useTokenVerification();
   const { user } = useAuth();
@@ -139,8 +141,8 @@ export const PredictionVoting = () => {
 
   const totalVotes = options.reduce((sum, opt) => sum + opt.vote_count, 0);
 
-  // Calculate current payout from live vault balance (no accumulation)
-  const vaultBalance = walletBalances?.vault_balance_sol || 0;
+  // Calculate current payout from live on-chain vault balance
+  const vaultBalance = onchain?.vault.balance_sol ?? 0;
   const payoutPercentage = walletConfig?.payout_percentage || 20;
   const currentPayout = (vaultBalance * payoutPercentage) / 100;
   const isRoundOpen = currentRound?.status === "open";
