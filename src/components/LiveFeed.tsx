@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTweets, Tweet } from "@/hooks/useTweets";
 import { motion, AnimatePresence } from "framer-motion";
 import elonmarketLogo from "@/assets/muskmarket-logo.jpg";
+import elonAvatar from "@/assets/elon-avatar.jpeg";
 import { supabase } from "@/integrations/supabase/client";
 
 const optionColors: Record<string, string> = {
