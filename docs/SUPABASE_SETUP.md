@@ -82,7 +82,7 @@ npx supabase functions deploy
 
 | Secret | Required | Description |
 |--------|----------|-------------|
-| `ADMIN_SECRET_KEY` | **Yes** | Password for admin panel login (e.g. `12345` or a strong random string). |
+| `ADMIN_SECRET_KEY` | **Yes** | Password for admin panel login (use a strong random string). |
 | `IFTTT_WEBHOOK_SECRET` | Optional | If set, IFTTT must send this in header `x-webhook-secret` or query `?secret=...`. |
 | `SOLANA_RPC_URL` | Optional | RPC for token checks (default: `https://api.mainnet-beta.solana.com`). |
 | `VAULT_URL` | Optional | Reward vault API base URL (for payouts). |
@@ -91,7 +91,7 @@ npx supabase functions deploy
 CLI example:
 
 ```bash
-npx supabase secrets set ADMIN_SECRET_KEY=12345
+npx supabase secrets set ADMIN_SECRET_KEY=your_strong_secret_here
 npx supabase secrets set IFTTT_WEBHOOK_SECRET=your_secret_if_you_use_it
 ```
 
@@ -100,7 +100,7 @@ npx supabase secrets set IFTTT_WEBHOOK_SECRET=your_secret_if_you_use_it
 ## 5. Admin panel access
 
 - URL: `https://your-app.com/admin` (or `http://localhost:5173/admin` in dev).
-- Log in with the **same value** you set for `ADMIN_SECRET_KEY` (e.g. `12345`).
+- Log in with the **same value** you set for `ADMIN_SECRET_KEY`.
 
 ---
 
