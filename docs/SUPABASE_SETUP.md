@@ -91,7 +91,7 @@ npx supabase functions deploy
 CLI example:
 
 ```bash
-npx supabase secrets set ADMIN_SECRET_KEY=12345
+npx supabase secrets set ADMIN_SECRET_KEY=your_strong_secret_here
 npx supabase secrets set IFTTT_WEBHOOK_SECRET=your_secret_if_you_use_it
 ```
 
