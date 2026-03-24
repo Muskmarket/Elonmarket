@@ -104,37 +104,24 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // --- Authentication: require secret or verified internal caller ---
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Load vault config from DB first, fall back to env vars
+    const { data: vaultConfig } = await supabase
+      .from("wallet_config")
+      .select("vault_api_url, vault_api_key")
+      .single();
+
+    const vaultUrl = vaultConfig?.vault_api_url || Deno.env.get("VAULT_URL");
+    const vaultPassword = vaultConfig?.vault_api_key || Deno.env.get("VAULT_PASSWORD");
+    console.log(`Vault config: url=${vaultUrl ? "set" : "missing"}, key=${vaultPassword ? "set" : "missing"}`);
+
+    // Get request body for potential triggers
     const body = await req.json().catch(() => ({}));
     const triggeredBy = body.triggered_by || "manual";
     const forceFinalize = body.force_finalize === true;
-
-    const expectedSecret = Deno.env.get("ADMIN_SECRET_KEY");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const providedSecret = body.admin_secret || req.headers.get("x-admin-secret");
-    
-    // Internal callers (ifttt_webhook, cron) must prove identity via service_role Bearer token
-    const authHeader = req.headers.get("Authorization") || "";
-    const bearerToken = authHeader.replace("Bearer ", "");
-    const isInternalCaller = 
-      (triggeredBy === "ifttt_webhook" || triggeredBy === "cron") && 
-      bearerToken === supabaseServiceKey;
-
-    if (!isInternalCaller && providedSecret !== expectedSecret) {
-      console.warn(`Unauthorized detect-winner call from: ${triggeredBy}`);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Use env vars only for vault credentials (never from DB)
-    const vaultUrl = Deno.env.get("VAULT_URL");
-    const vaultPassword = Deno.env.get("VAULT_PASSWORD");
-    console.log(`Vault config: url=${vaultUrl ? "set" : "missing"}, key=${vaultPassword ? "set" : "missing"}`);
 
     // Check for open rounds where prediction time has ended
     const { data: openRound } = await supabase
@@ -409,13 +396,13 @@ async function finalizeRound(
 
   const { data: walletConfig } = await supabase
     .from("wallet_config")
-    .select("payout_percentage")
+    .select("payout_percentage, vault_api_url, vault_api_key")
     .single();
 
   const payoutPercentage = walletConfig?.payout_percentage || 20;
-  // Always use env vars for vault credentials (never from DB)
-  const effectiveVaultUrl = vaultUrl;
-  const effectiveVaultKey = vaultPassword;
+  // Use DB vault config if available (overrides function params)
+  const effectiveVaultUrl = walletConfig?.vault_api_url || vaultUrl;
+  const effectiveVaultKey = walletConfig?.vault_api_key || vaultPassword;
 
   let vaultBalance = 0;
   if (effectiveVaultUrl) {

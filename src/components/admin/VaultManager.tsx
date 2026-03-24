@@ -29,16 +29,16 @@ export const VaultManager = ({ adminSecretKey }: { adminSecretKey: string }) => 
 
   useEffect(() => {
     const loadData = async () => {
-      const [walletRes, { data: walletBalances }] = await Promise.all([
-        callAdmin("get_wallet_config").catch(() => null),
+      const [{ data: walletConfig }, { data: walletBalances }] = await Promise.all([
+        supabase.from("wallet_config").select("*").maybeSingle(),
         supabase.from("wallet_balances").select("*").maybeSingle(),
       ]);
 
-      if (walletRes) {
+      if (walletConfig) {
         setConfig({
-          vaultWallet: walletRes.vault_wallet_address || "",
-          payoutWallet: walletRes.payout_wallet_address || "",
-          payoutPercentage: walletRes.payout_percentage || 15,
+          vaultWallet: walletConfig.vault_wallet_address || "",
+          payoutWallet: walletConfig.payout_wallet_address || "",
+          payoutPercentage: walletConfig.payout_percentage || 15,
         });
       }
 

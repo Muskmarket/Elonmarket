@@ -71,12 +71,6 @@ Deno.serve(async (req) => {
     }
 
     switch (action) {
-      case "get_wallet_config": {
-        const { data: wc } = await supabase.from("wallet_config").select("*").maybeSingle();
-        return new Response(JSON.stringify(wc || {}), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       case "update_wallet_config": {
         const updateData: Record<string, any> = {
           updated_at: new Date().toISOString(),
@@ -325,11 +319,11 @@ Deno.serve(async (req) => {
 
       case "vault_config": {
         const vaultUrl = Deno.env.get("VAULT_URL")!;
-        const vaultAdminKey = Deno.env.get("VAULT_ADMIN_PASSWORD")!;
+        const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
 
         const headers: Record<string, string> = { 
           "Content-Type": "application/json",
-          "x-api-key": vaultAdminKey 
+          "x-api-key": vaultApiKey 
         };
 
         const configResponse = await fetch(`${vaultUrl}/config`, {
@@ -346,11 +340,11 @@ Deno.serve(async (req) => {
 
       case "vault_drain": {
         const vaultUrl = Deno.env.get("VAULT_URL")!;
-        const vaultAdminKey = Deno.env.get("VAULT_ADMIN_PASSWORD")!;
+        const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
 
         const headers: Record<string, string> = { 
           "Content-Type": "application/json",
-          "x-api-key": vaultAdminKey 
+          "x-api-key": vaultApiKey 
         };
 
         const drainResponse = await fetch(`${vaultUrl}/config`, {
