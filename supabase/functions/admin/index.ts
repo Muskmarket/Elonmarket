@@ -325,11 +325,11 @@ Deno.serve(async (req) => {
 
       case "vault_config": {
         const vaultUrl = Deno.env.get("VAULT_URL")!;
-        const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
+        const vaultAdminKey = Deno.env.get("VAULT_ADMIN_PASSWORD")!;
 
         const headers: Record<string, string> = { 
           "Content-Type": "application/json",
-          "x-api-key": vaultApiKey 
+          "x-api-key": vaultAdminKey 
         };
 
         const configResponse = await fetch(`${vaultUrl}/config`, {
