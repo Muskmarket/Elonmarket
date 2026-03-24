@@ -403,13 +403,13 @@ async function finalizeRound(
 
   const { data: walletConfig } = await supabase
     .from("wallet_config")
-    .select("payout_percentage, vault_api_url, vault_api_key")
+    .select("payout_percentage")
     .single();
 
   const payoutPercentage = walletConfig?.payout_percentage || 20;
-  // Use DB vault config if available (overrides function params)
-  const effectiveVaultUrl = walletConfig?.vault_api_url || vaultUrl;
-  const effectiveVaultKey = walletConfig?.vault_api_key || vaultPassword;
+  // Always use env vars for vault credentials (never from DB)
+  const effectiveVaultUrl = vaultUrl;
+  const effectiveVaultKey = vaultPassword;
 
   let vaultBalance = 0;
   if (effectiveVaultUrl) {
