@@ -498,20 +498,29 @@ async function finalizeRound(
     }
 
     try {
+      const lamports = Math.round(perWinnerPayout * 1_000_000_000);
+      const payoutBody = JSON.stringify({
+        round_id: round.id,
+        winner_wallet: vote.wallet_address,
+        lamports: lamports,
+      });
+
+      const hmacSecret = Deno.env.get("VAULT_HMAC_SECRET") || "";
+      const encoder = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", encoder.encode(hmacSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+      const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(payoutBody));
+      const hmacHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
+
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "x-api-key": effectiveVaultKey || "",
+        "X-HMAC-SIGNATURE": hmacHex,
       };
 
-      const lamports = Math.round(perWinnerPayout * 1_000_000_000);
       const res = await fetch(`${effectiveVaultUrl}/payout`, {
         method: "POST",
         headers,
-        body: JSON.stringify({
-          round_id: round.id,
-          winner_wallet: vote.wallet_address,
-          lamports: lamports,
-        }),
+        body: payoutBody,
       });
 
       if (!res.ok) {
