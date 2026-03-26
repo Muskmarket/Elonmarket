@@ -260,7 +260,7 @@ Deno.serve(async (req) => {
 
 
       case "vault_refresh_balance": {
-        const vaultUrl = Deno.env.get("VAULT_URL")!;
+        const vaultUrl = (Deno.env.get("VAULT_URL") || "").replace(/\/+$/, "");
         const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
         const hmacSecret = Deno.env.get("VAULT_HMAC_SECRET") || "";
 
