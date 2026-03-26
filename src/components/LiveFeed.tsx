@@ -165,10 +165,10 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
     ? cleanText.slice(0, 180).trim() + "…"
     : cleanText;
 
-  // Always use elonmusk/status/{id} format for all tweet types
-  const tweetUrl = tweet.tweet_id
-    ? `https://x.com/elonmusk/status/${tweet.tweet_id}`
-    : tweet.tweet_url;
+  const tweetUrl =
+    (tweet.author_username && tweet.tweet_id
+      ? `https://x.com/${tweet.author_username}/status/${tweet.tweet_id}`
+      : undefined) || tweet.tweet_url;
 
   return (
     <motion.div
