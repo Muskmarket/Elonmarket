@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, addHours, addDays, differenceInMinutes, parseISO } from "date-fns";
 import { formatToLocalTime, formatToLocalFullDate, parseToUTC } from "@/lib/utils";
+import { adminSupabase, getAdminFunctionHeaders, getAdminFunctionUrl } from "@/lib/adminBackend";
 
 const optionIcons: Record<string, string> = {
   Tesla: "/tesla-logo.png",
@@ -64,7 +64,7 @@ export const RoundManager = ({ adminSecretKey }: { adminSecretKey: string }) => 
   }, []);
 
   const fetchGameConfig = async () => {
-    const { data } = await supabase
+    const { data } = await adminSupabase
       .from("game_config" as any)
       .select("*")
       .limit(1)
@@ -79,7 +79,7 @@ export const RoundManager = ({ adminSecretKey }: { adminSecretKey: string }) => 
   };
 
   const fetchRounds = async () => {
-    const { data } = await supabase
+    const { data } = await adminSupabase
       .from("prediction_rounds")
       .select("*")
       .order("round_number", { ascending: false })
@@ -90,27 +90,21 @@ export const RoundManager = ({ adminSecretKey }: { adminSecretKey: string }) => 
   const saveGameConfig = async () => {
     setSavingConfig(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      const response = await fetch(getAdminFunctionUrl("admin"), {
+        method: "POST",
+        headers: getAdminFunctionHeaders(),
+        body: JSON.stringify({
+          action: "update_game_config",
+          adminWallet: "private_admin",
+          adminSecretKey,
+          data: {
+            id: gameConfigId,
+            rss_feed_url: "",
+            posts_to_display: postsToDisplay,
+            default_options: defaultOptions,
           },
-          body: JSON.stringify({
-            action: "update_game_config",
-            adminWallet: "private_admin",
-            adminSecretKey,
-            data: {
-              id: gameConfigId,
-              rss_feed_url: "",
-              posts_to_display: postsToDisplay,
-              default_options: defaultOptions,
-            },
-          }),
-        }
-      );
+        }),
+      });
       if (!response.ok) throw new Error("Failed to save");
       toast({ title: "Saved!", description: "Game settings updated." });
     } catch {
@@ -158,33 +152,27 @@ export const RoundManager = ({ adminSecretKey }: { adminSecretKey: string }) => 
 
     setCreating(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      const response = await fetch(getAdminFunctionUrl("admin"), {
+        method: "POST",
+        headers: getAdminFunctionHeaders(),
+        body: JSON.stringify({
+          action: "create_round",
+          adminWallet: "private_admin",
+          adminSecretKey,
+          data: {
+            question: newRound.question,
+            startTime: new Date().toISOString(),
+            endTime: new Date(newRound.predictionEndTime).toISOString(),
+            predictionStartTime: new Date(newRound.predictionStartTime).toISOString(),
+            voteLockMinutes: newRound.voteLockMinutes,
+            status: "open",
+            options: defaultOptions.map((label) => ({
+              label,
+              keywords: [label.toLowerCase()],
+            })),
           },
-          body: JSON.stringify({
-            action: "create_round",
-            adminWallet: "private_admin",
-            adminSecretKey,
-            data: {
-              question: newRound.question,
-              startTime: new Date().toISOString(),
-              endTime: new Date(newRound.predictionEndTime).toISOString(),
-              predictionStartTime: new Date(newRound.predictionStartTime).toISOString(),
-              voteLockMinutes: newRound.voteLockMinutes,
-              status: "open",
-              options: defaultOptions.map((label) => ({
-                label,
-                keywords: [label.toLowerCase()],
-              })),
-            },
-          }),
-        }
-      );
+        }),
+      });
 
       if (!response.ok) throw new Error("Failed to create round");
       toast({ title: "Round Created!", description: "Round is now open for voting." });
@@ -205,12 +193,9 @@ export const RoundManager = ({ adminSecretKey }: { adminSecretKey: string }) => 
   const endRound = async (roundId: string) => {
     setLoading(true);
     try {
-      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/detect-winner`, {
+      await fetch(getAdminFunctionUrl("detect-winner"), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
+        headers: getAdminFunctionHeaders(),
       });
       toast({ title: "Round ended!", description: "Winner detection triggered." });
       fetchRounds();
