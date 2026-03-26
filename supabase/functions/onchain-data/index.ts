@@ -183,7 +183,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const vaultUrl = Deno.env.get("VAULT_URL")!;
+    const vaultUrl = (Deno.env.get("VAULT_URL") || "").replace(/\/+$/, "");
     const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
     const hmacSecret = Deno.env.get("VAULT_HMAC_SECRET") || "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
