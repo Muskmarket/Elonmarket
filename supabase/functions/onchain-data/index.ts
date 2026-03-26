@@ -180,6 +180,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const vaultUrl = Deno.env.get("VAULT_URL")!;
     const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
+    const hmacSecret = Deno.env.get("VAULT_HMAC_SECRET") || "";
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get wallet config from DB
