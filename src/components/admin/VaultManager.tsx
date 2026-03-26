@@ -101,19 +101,6 @@ export const VaultManager = ({ adminSecretKey }: { adminSecretKey: string }) => 
     }
   };
 
-  const handleDrain = async () => {
-    if (!confirm("⚠️ Are you sure you want to drain the vault? This action cannot be undone.")) return;
-    setDraining(true);
-    try {
-      await callAdmin("vault_drain");
-      toast({ title: "Vault Drained", description: "All funds have been withdrawn from the vault." });
-      handleRefreshBalance();
-    } catch (error) {
-      toast({ title: "Error", description: error instanceof Error ? error.message : "Drain failed", variant: "destructive" });
-    } finally {
-      setDraining(false);
-    }
-  };
 
   const handleTransferOwnership = async () => {
     if (!newOwner.trim()) {
