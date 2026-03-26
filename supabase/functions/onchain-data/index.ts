@@ -121,6 +121,11 @@ async function getTokenHolderCount(mint: string): Promise<number> {
   return 0;
 }
 
+/**
+ * Generate HMAC-SHA256 signature.
+ * For GET requests: sign empty string "" (FastAPI request.body() returns b"" for GET)
+ * For POST requests: sign the actual JSON body string
+ */
 async function generateHMAC(body: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -143,8 +148,8 @@ async function getVaultInfo(vaultUrl: string, apiKey: string, hmacSecret: string
   }
 
   try {
-    const emptyBody = JSON.stringify({});
-    const hmacHex = await generateHMAC(emptyBody, hmacSecret);
+    // GET request: FastAPI reads empty body, so sign empty string
+    const hmacHex = await generateHMAC("", hmacSecret);
 
     const balRes = await fetch(`${vaultUrl}/balance`, {
       headers: {
