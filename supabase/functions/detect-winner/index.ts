@@ -565,7 +565,8 @@ async function finalizeRound(
       const hmacSecret2 = Deno.env.get("VAULT_HMAC_SECRET") || "";
       const encoder2 = new TextEncoder();
       const key2 = await crypto.subtle.importKey("raw", encoder2.encode(hmacSecret2), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-      const sig2 = await crypto.subtle.sign("HMAC", key2, encoder2.encode(JSON.stringify({})));
+      // GET request: sign empty string
+      const sig2 = await crypto.subtle.sign("HMAC", key2, encoder2.encode(""));
       const hmacHex2 = Array.from(new Uint8Array(sig2)).map(b => b.toString(16).padStart(2, "0")).join("");
 
       const postPayoutRes = await fetch(`${effectiveVaultUrl}/balance`, {
