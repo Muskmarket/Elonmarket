@@ -39,7 +39,7 @@ export function usePredictionRound() {
   const [options, setOptions] = useState<PredictionOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isDetectingRef = useRef(false);
+  
 
   const fetchCurrentRound = useCallback(async () => {
     try {
