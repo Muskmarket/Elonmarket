@@ -262,12 +262,12 @@ Deno.serve(async (req) => {
       case "vault_refresh_balance": {
         const vaultUrl = Deno.env.get("VAULT_URL")!;
         const vaultApiKey = Deno.env.get("VAULT_PASSWORD")!;
+        const hmacSecret = Deno.env.get("VAULT_HMAC_SECRET") || "";
 
         let vaultBalance = 0;
         let vaultAddress = "";
 
         try {
-          // 1. Get current address from fund endpoint
           const fundRes = await fetch(`${vaultUrl}/fund`);
           if (fundRes.ok) {
             const fundData = await fundRes.json();
@@ -278,9 +278,16 @@ Deno.serve(async (req) => {
         }
 
         try {
+          const emptyBody = JSON.stringify({});
+          const encoder = new TextEncoder();
+          const key = await crypto.subtle.importKey("raw", encoder.encode(hmacSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+          const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(emptyBody));
+          const hmacHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
+
           const headers: Record<string, string> = { 
             "Content-Type": "application/json",
-            "x-api-key": vaultApiKey 
+            "x-api-key": vaultApiKey,
+            "X-HMAC-SIGNATURE": hmacHex,
           };
 
           const vaultResponse = await fetch(`${vaultUrl}/balance`, {
