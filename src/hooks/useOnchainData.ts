@@ -81,22 +81,16 @@ async function fetchOnchainData(): Promise<OnchainData | null> {
 
   inFlightRequest = (async () => {
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const res = await fetch(`${supabaseUrl}/functions/v1/onchain-data`, {
+      const { data, error } = await supabase.functions.invoke("onchain-data", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({}),
+        body: {},
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+      if (error) {
+        throw error;
       }
 
-      const result = (await res.json()) as OnchainData;
+      const result = data as OnchainData;
       cachedOnchainData = result;
       return result;
     } catch (err) {
