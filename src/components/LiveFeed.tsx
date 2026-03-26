@@ -165,10 +165,11 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
     ? cleanText.slice(0, 180).trim() + "…"
     : cleanText;
 
+  // Always link to elonmusk's status page so retweets/reposts stay visible on his profile
   const tweetUrl =
-    (tweet.author_username && tweet.tweet_id
-      ? `https://x.com/${tweet.author_username}/status/${tweet.tweet_id}`
-      : undefined) || tweet.tweet_url;
+    tweet.tweet_id
+      ? `https://x.com/elonmusk/status/${tweet.tweet_id}`
+      : tweet.tweet_url;
 
   return (
     <motion.div
