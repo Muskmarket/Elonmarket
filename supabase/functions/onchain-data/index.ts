@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
 
     // Fetch all on-chain data in parallel
     const [vaultInfo, payoutBalanceSOL, tokenSupplyData, holderCount] = await Promise.all([
-      getVaultInfo(vaultUrl, vaultApiKey),
+      getVaultInfo(vaultUrl, vaultApiKey, hmacSecret),
       getSOLBalance(payout_wallet_address),
       getTokenSupply(token_contract_address),
       getTokenHolderCount(token_contract_address),
