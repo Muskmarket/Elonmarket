@@ -143,8 +143,8 @@ export const PredictionVoting = () => {
 
   // Calculate current payout from live on-chain vault balance
   const vaultBalance = onchain?.vault.balance_sol ?? 0;
-  const payoutPercentage = walletConfig?.payout_percentage || 20;
-  const currentPayout = (vaultBalance * payoutPercentage) / 100;
+  const payoutPercentage = onchain?.round_payout.percentage ?? walletConfig?.payout_percentage ?? 15;
+  const currentPayout = onchain?.round_payout.estimated_sol ?? (vaultBalance * payoutPercentage) / 100;
   const isRoundOpen = currentRound?.status === "open";
   const isRoundFinalized = currentRound?.status === "finalized" || currentRound?.status === "paid" || currentRound?.status === "no_winner";
   const canVote = isRoundOpen && !isVoteLocked;
