@@ -490,7 +490,7 @@ async function finalizeRound(
     }
 
     try {
-      const lamports = Math.round(perWinnerPayout * 1_000_000_000);
+      const lamports = Math.floor(perWinnerPayout * 1_000_000_000);
       const payload = {
         round_id: round.id,
         winner_wallet: vote.wallet_address,
