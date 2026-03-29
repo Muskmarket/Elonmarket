@@ -17,7 +17,7 @@ const SECTIONS = [
     { id: "options", label: "Prediction Options" },
   ]},
   { id: "tech", label: "Technical Engine", icon: Cpu, sub: [
-    { id: "monitoring", label: "Post Monitoring" },
+    { id: "monitoring", label: "Post Monitoring Structure" },
     { id: "streaming", label: "Live Streaming" },
     { id: "resolution", label: "Winner Resolution" },
   ]},
@@ -278,7 +278,7 @@ const Docs = () => {
               <h2 className="text-3xl font-display font-bold mb-8">Technical Engine</h2>
               
               <div id="monitoring" className="mb-12 scroll-mt-28">
-                <h3 className="text-xl font-bold mb-4">Post Monitoring</h3>
+                <h3 className="text-xl font-bold mb-4">Post Monitoring Structure</h3>
                 <div className="bg-black/80 rounded-2xl p-6 font-mono text-sm border border-border shadow-2xl space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-white/10">
                     <Terminal className="w-4 h-4 text-neon-green" />
