@@ -224,71 +224,74 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                   : "Sign Wallet and Set Password"}
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
-            {mode === "login" ? (
-              <>
-                Don't have an account?{" "}
-                <button
-                  type="button"
-                  className="text-neon-cyan hover:underline"
-                  onClick={() => {
-                    setMode("register");
-                    resetState();
-                  }}
-                >
-                  Register
-                </button>
-                {" · "}
-                <button
-                  type="button"
-                  className="text-neon-cyan hover:underline"
-                  onClick={() => {
-                    setMode("reset");
-                    resetState();
-                    if (publicKey) setWalletAddress(publicKey.toBase58());
-                  }}
-                >
-                  Forgot password / old account
-                </button>
-              </>
-            ) : mode === "register" ? (
-              <>
-                Already registered?{" "}
-                <button
-                  type="button"
-                  className="text-neon-cyan hover:underline"
-                  onClick={() => {
-                    setMode("login");
-                    resetState();
-                  }}
-                >
-                  Login
-                </button>
-              </>
-            ) : (
-              <>
-                Back to{" "}
-                <button
-                  type="button"
-                  className="text-neon-cyan hover:underline"
-                  onClick={() => {
-                    setMode("login");
-                    resetState();
-                  }}
-                >
-                  Login
-                </button>
-              </>
-            )}
-          </p>
+          {/* Apply mt-6 for 24px vertical gap */}
+          <div className="mt-6 text-center space-y-3"> {/* Container for links and info text */}
+            <p className="text-sm text-muted-foreground"> {/* Changed text-xs to text-sm, kept text-center */}
+              {mode === "login" ? (
+                <>
+                  Don't have an account?{" "}
+                  <button
+                    type="button"
+                    className="text-neon-cyan hover:underline font-medium" // Added font-medium
+                    onClick={() => {
+                      setMode("register");
+                      resetState();
+                    }}
+                  >
+                    Register
+                  </button>
+                  {" · "}
+                  <button
+                    type="button"
+                    className="text-neon-cyan hover:underline font-normal opacity-85" // Added font-normal opacity-85
+                    onClick={() => {
+                      setMode("reset");
+                      resetState();
+                      if (publicKey) setWalletAddress(publicKey.toBase58());
+                    }}
+                  >
+                    Forgot password / old account
+                  </button>
+                </>
+              ) : mode === "register" ? (
+                <>
+                  Already registered?{" "}
+                  <button
+                    type="button"
+                    className="text-neon-cyan hover:underline font-medium" // Added font-medium
+                    onClick={() => {
+                      setMode("login");
+                      resetState();
+                    }}
+                  >
+                    Login
+                  </button>
+                </>
+              ) : (
+                <>
+                  Back to{" "}
+                  <button
+                    type="button"
+                    className="text-neon-cyan hover:underline font-medium" // Added font-medium
+                    onClick={() => {
+                      setMode("login");
+                      resetState();
+                    }}
+                  >
+                    Login
+                  </button>
+                </>
+              )}
+            </p>
 
-          <p className="text-xs text-muted-foreground text-center">
-            {mode === "register"
-              ? "Your wallet stays linked to your account, and your password protects access."
-              : mode === "reset"
-                ? "For legacy accounts or forgotten passwords, connect the registered wallet and sign the reset challenge."
-                : "Login uses your username and password. Wallet access is not required here."}
-          </p>
+            <p className="text-sm text-muted-foreground text-center"> {/* Changed text-xs to text-sm, kept text-center */}
+              {mode === "register"
+                ? "Your wallet stays linked to your account, and your password protects access."
+                : mode === "reset"
+                  ? "For legacy accounts or forgotten passwords, connect the registered wallet and sign the reset challenge."
+                  : "Login uses your username and password. Wallet access is not required here."}
+            </p>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
