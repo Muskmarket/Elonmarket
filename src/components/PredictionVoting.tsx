@@ -295,7 +295,7 @@ export const PredictionVoting = () => {
                 </div>
 
                 {/* Vote Button */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {!user ? (
                     <Button variant="neon" className="w-full" onClick={() => setAuthModalOpen(true)}>
                       <UserIcon className="w-3.5 h-3.5 mr-2" />
