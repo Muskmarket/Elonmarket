@@ -509,11 +509,28 @@ async function finalizeRound(
         continue;
       }
 
-      const data = await res.json();
+      const rawText = await res.text();
+      console.log(`Raw vault response for ${vote.wallet_address}:`, rawText);
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+        // Handle double-stringified responses
+        if (typeof data === "string") {
+          data = JSON.parse(data);
+        }
+        // Handle nested data/result wrappers
+        if (data.data && typeof data.data === "object") {
+          data = { ...data, ...data.data };
+        }
+        if (data.result && typeof data.result === "object") {
+          data = { ...data, ...data.result };
+        }
+      } catch (e) {
+        console.error(`Failed to parse vault response: ${rawText}`);
+        data = {};
+      }
       successfulPayouts += 1;
-      // Log full vault response to debug tx_signature field name
-      console.log(`Payout response for ${vote.wallet_address}:`, JSON.stringify(data));
-      const txSig = data.tx_signature || data.signature || data.tx || data.txSignature || data.txHash || data.tx_hash || data.transactionSignature || data.transaction_signature || data.hash || data?.result?.tx_signature || data?.result?.signature || data?.result?.tx || data?.data?.tx_signature || data?.data?.signature || data?.data?.tx || null;
+      const txSig = data.tx_signature || data.signature || data.tx || data.txSignature || data.txHash || data.tx_hash || data.transactionSignature || data.transaction_signature || data.hash || null;
       if (!txSig) {
         console.error(`WARNING: No tx_signature found in vault response for ${vote.wallet_address}. Full response: ${JSON.stringify(data)}`);
       }
