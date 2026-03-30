@@ -244,7 +244,7 @@ export const PredictionVoting = () => {
                         key={option.id}
                         onClick={() => !hasVoted && canVote && setSelectedOption(option.id)}
                         disabled={hasVoted || !canVote}
-                        className={`relative w-full p-3.5 rounded-lg border transition-all duration-200 text-left ${
+                        className={`relative w-full p-2.5 rounded-lg border transition-all duration-200 text-left ${
                           isWinner
                             ? "border-neon-green bg-neon-green/5"
                             : isSelected
