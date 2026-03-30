@@ -218,11 +218,11 @@ export const PredictionVoting = () => {
                 </div>
               </CardHeader>
 
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 {/* Prediction time frame info */}
                 {currentRound?.prediction_start_time && isRoundOpen && (
-                  <div className={`mb-4 p-2.5 rounded-lg border ${isVoteLocked ? "bg-neon-orange/5 border-neon-orange/30" : "bg-neon-green/5 border-neon-green/30"}`}>
-                    <p className="text-xs">
+                  <div className={`mb-3 p-2 rounded-lg border ${isVoteLocked ? "bg-neon-orange/5 border-neon-orange/30" : "bg-neon-green/5 border-neon-green/30"}`}>
+                    <p className="text-[11px]">
                       {isVoteLocked ? (
                         <span className="text-neon-orange">🔒 Votes locked. Prediction monitoring {voteLockRemaining === "Monitoring..." ? "is active" : `starts in ${voteLockRemaining}`}.</span>
                       ) : (
