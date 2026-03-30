@@ -150,14 +150,14 @@ export const PredictionVoting = () => {
   const canVote = isRoundOpen && !isVoteLocked;
 
   return (
-    <section id="predict" className="py-12 relative">
+    <section id="predict" className="py-8 relative">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="mb-6">
-          <h2 className="font-display text-xl md:text-2xl font-semibold text-foreground mb-1">
+        <div className="mb-4">
+          <h2 className="font-display text-lg md:text-xl font-semibold text-foreground mb-0.5">
             Markets
           </h2>
-          <p className="font-display text-xl mt-2 flex flex-col items-center gap-1 md:text-2xl font-semibold text-muted-foreground mb-1">
+          <p className="font-display text-base mt-1 flex flex-col items-center gap-1 md:text-lg font-semibold text-muted-foreground mb-0.5">
             {currentRound?.question || "What will Elon tweet about next?"}
           </p>
           {currentRound?.prediction_start_time && currentRound?.end_time && (
