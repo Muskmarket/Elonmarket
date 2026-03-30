@@ -306,8 +306,8 @@ export const PredictionVoting = () => {
                       Verifying token balance...
                     </Button>
                   ) : !balance?.isEligible ? (
-                    <div className="text-center p-3 rounded-lg bg-destructive/10 border border-destructive/30">
-                      <AlertCircle className="w-5 h-5 text-destructive mx-auto mb-1.5" />
+                    <div className="text-center p-2.5 rounded-lg bg-destructive/10 border border-destructive/30">
+                      <AlertCircle className="w-4 h-4 text-destructive mx-auto mb-1" />
                       <p className="text-destructive font-medium">Insufficient token balance</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         You need at least {walletConfig?.min_token_balance || 1} tokens to participate
