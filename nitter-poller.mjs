@@ -123,6 +123,14 @@ async function poll() {
         continue;
       }
 
+      // Deduplicate: if the core text (stripped of RT prefix) was already sent, skip
+      if (isDuplicateText(title)) {
+        console.log("Skipping duplicate repost:", title.slice(0, 80));
+        lastTweetId = guid;
+        continue;
+      }
+
+      const isRt = /^RT by\s+@/i.test(title);
       const { mainText, quotedTweetText } = parseQuoteFromDescription(title, description);
       const body = {
         text: mainText,
@@ -130,7 +138,7 @@ async function poll() {
         created_at: pubDate,
         user_name: USER_DISPLAY_NAME,
         author_username: PROFILE_USERNAME,
-        tweet_type: quotedTweetText ? "quote" : "post",
+        tweet_type: isRt ? "repost" : (quotedTweetText ? "quote" : "post"),
       };
       if (quotedTweetText) body.quoted_tweet_text = quotedTweetText;
 
