@@ -19,7 +19,7 @@ Elonmarket is a decentralized, free-to-play prediction marketplace where users p
 - ⚡ **Real-Time Streaming:** Watch Elon's posts appear live via our high-speed monitoring engine.
 - 🤖 **Automated Reward Engine:** Instant winner detection and distribution.
 - 🏆 **Global Leaderboard:** Track your rank against the world's best predictors.
-- 💎 **Sustainable Rewards:** Funded by Creator Rewards from pump.fun with auto-vault funding every 10 minutes.
+- 💎 **Sustainable Rewards:** Funded by Creator Rewards from pump.fun with auto-vault funding every 20 minutes.
 
 ---
 
