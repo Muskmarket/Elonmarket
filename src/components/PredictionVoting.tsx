@@ -314,8 +314,8 @@ export const PredictionVoting = () => {
                       </p>
                     </div>
                   ) : hasVoted ? (
-                    <div className="text-center p-3 rounded-lg bg-neon-green/10 border border-neon-green/30">
-                      <CheckCircle className="w-5 h-5 text-neon-green mx-auto mb-1.5" />
+                    <div className="text-center p-2.5 rounded-lg bg-neon-green/10 border border-neon-green/30">
+                      <CheckCircle className="w-4 h-4 text-neon-green mx-auto mb-1" />
                       <p className="text-neon-green font-medium">Vote submitted!</p>
                       <p className="text-xs text-muted-foreground mt-0.5">Your prediction has been recorded</p>
                     </div>
