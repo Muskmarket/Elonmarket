@@ -129,8 +129,8 @@ function highlightMatchesInText(text: string, options: string[]): React.ReactNod
 // so account display names (e.g. "Tesla") don't cause false keyword matches
 const stripAttributionPatterns = (text: string): string => {
   let cleaned = text;
-  // Remove "RT by @username:" prefix
-  cleaned = cleaned.replace(/^RT by @\S+:\s*/i, "");
+  // Remove "RT by @username:" or "RT @username:" prefix
+  cleaned = cleaned.replace(/^RT\s+(by\s+)?@\S+:\s*/i, "");
   // Remove "DisplayName (@username)" patterns (e.g. "Tesla Motors (@tesla)")
   cleaned = cleaned.replace(/\b[\w\s]+\(@\w+\)/g, "");
   return cleaned;
@@ -170,12 +170,12 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
   }, [postDate.getTime()]);
 
   // Detect if it's a pure repost based on tweet_type or text prefix
-  const isRepost = tweet.tweet_type === "repost" || /^rt\s+(by\s+)?@/i.test(tweet.text);
+  const isRepost = tweet.tweet_type === "repost" || /^RT\s+(by\s+)?@/i.test(tweet.text);
   const isQuote = tweet.tweet_type === "quote" && !isRepost;
 
   // For reposts without quoted_tweet_text, extract the reposted content from main text
   const repostContent = isRepost && !tweet.quoted_tweet_text
-    ? tweet.text.replace(/^RT\s+(@\S+:\s*)?/i, "").trim()
+    ? tweet.text.replace(/^RT\s+(by\s+)?@\S+:\s*/i, "").trim()
     : null;
 
   // Preserve @mentions (e.g. @Tesla, @SpaceX) - only collapse extra spaces
