@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import { parseStringPromise } from "xml2js";
+import { createClient } from "@supabase/supabase-js";
 
 // Load .env from the same directory as this script (so PM2 picks it up no matter where it's started from).
 // 'override: true' ensures the values in this .env win over any existing env vars set by PM2 or the shell.
@@ -23,6 +24,28 @@ const RAW_DISPLAY_ENV = process.env.USER_DISPLAY_NAME;
 const PROFILE_USERNAME = (RAW_PROFILE_ENV ?? "").trim() || "elonmusk";
 // Display name shown in app for tweets (e.g. "Elon Musk" or "Your Name")
 const USER_DISPLAY_NAME = (RAW_DISPLAY_ENV ?? "").trim() || "Elon Musk";
+
+// ── Supabase client for live logging ──
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+let sb = null;
+if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
+  sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  console.log("✅ Live logging enabled (poller_logs table)");
+} else {
+  console.warn("⚠️ Live logging disabled — missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+}
+
+/** Insert a log entry into poller_logs (fire-and-forget). */
+async function log(level, message) {
+  console.log(`[${level.toUpperCase()}] ${message}`);
+  if (!sb) return;
+  try {
+    await sb.from("poller_logs").insert({ level, message });
+  } catch (e) {
+    // Silently ignore logging errors so they don't break polling
+  }
+}
 
 if (!NITTER_BASE_URL || !SUPABASE_WEBHOOK_URL) {
   console.error("Missing NITTER_BASE_URL or SUPABASE_WEBHOOK_URL");
@@ -94,10 +117,11 @@ async function poll() {
     // Use with_replies to include tweets that start with @ (e.g. "@Tesla is working hard")
     const feedPath = INCLUDE_REPLIES ? `${PROFILE_USERNAME}/with_replies/rss` : `${PROFILE_USERNAME}/rss`;
     const rssUrl = `${NITTER_BASE_URL.replace(/\/$/, "")}/${feedPath}`;
-    console.log("Polling RSS:", rssUrl);
+    await log("poll", `Polling RSS: ${rssUrl}`);
     const res = await fetch(rssUrl);
     if (!res.ok) {
-      console.error("Nitter RSS error:", res.status, await res.text());
+      const errText = await res.text();
+      await log("error", `RSS error ${res.status}: ${errText.slice(0, 120)}`);
       return;
     }
 
@@ -106,6 +130,10 @@ async function poll() {
 
     const channel = parsed && parsed.rss && parsed.rss.channel && parsed.rss.channel[0];
     const items = (channel && channel.item) || [];
+
+    if (items.length === 0) {
+      await log("info", "No items in RSS feed");
+    }
 
     for (const item of items.reverse()) {
       const link = (item.link && item.link[0]) || "";
@@ -119,13 +147,13 @@ async function poll() {
 
       // Skip replies entirely: Nitter marks them as "R to @username: ..."
       if (/^R to\s+@/i.test(title)) {
-        console.log("Skipping reply:", title.slice(0, 80));
+        await log("skip", `Reply skipped: ${title.slice(0, 60)}`);
         continue;
       }
 
       // Deduplicate: if the core text (stripped of RT prefix) was already sent, skip
       if (isDuplicateText(title)) {
-        console.log("Skipping duplicate repost:", title.slice(0, 80));
+        await log("skip", `Duplicate skipped: ${title.slice(0, 60)}`);
         lastTweetId = guid;
         continue;
       }
@@ -145,6 +173,9 @@ async function poll() {
       const headers = { "Content-Type": "application/json" };
       if (WEBHOOK_SECRET) headers["x-webhook-secret"] = WEBHOOK_SECRET;
 
+      const tweetTypeLabel = isRt ? "repost" : (quotedTweetText ? "quote" : "post");
+      await log(tweetTypeLabel, `New ${tweetTypeLabel} detected: ${mainText.slice(0, 80)}`);
+
       const resp = await fetch(SUPABASE_WEBHOOK_URL, {
         method: "POST",
         headers,
@@ -153,22 +184,22 @@ async function poll() {
 
       if (!resp.ok) {
         const errorText = await resp.text();
-        console.error("Supabase webhook error:", resp.status, errorText);
+        await log("error", `Webhook error ${resp.status}: ${errorText.slice(0, 120)}`);
       } else {
         const preview = quotedTweetText ? `${mainText.slice(0, 40)}... [+quote]` : mainText.slice(0, 80);
-        console.log("Tweet sent to Supabase:", preview);
+        await log("success", `Sent to backend: ${preview}`);
         trackText(mainText);
       }
 
       lastTweetId = guid;
     }
   } catch (e) {
-    console.error("Poll error:", e);
+    await log("error", `Poll error: ${e.message || e}`);
   }
 }
 
 async function main() {
-  console.log("Starting Nitter poller...");
+  await log("info", `Poller started — monitoring @${PROFILE_USERNAME} every 10s`);
   await poll();
   setInterval(poll, 10_000);
 }
