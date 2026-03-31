@@ -173,6 +173,11 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
   const isRepost = tweet.tweet_type === "repost" || /^rt\s+(by\s+)?@/i.test(tweet.text);
   const isQuote = tweet.tweet_type === "quote" && !isRepost;
 
+  // For reposts without quoted_tweet_text, extract the reposted content from main text
+  const repostContent = isRepost && !tweet.quoted_tweet_text
+    ? tweet.text.replace(/^RT\s+(@\S+:\s*)?/i, "").trim()
+    : null;
+
   // Preserve @mentions (e.g. @Tesla, @SpaceX) - only collapse extra spaces
   const cleanText = tweet.text.replace(/\s{2,}/g, " ").trim();
   const truncatedText = cleanText.length > 180
@@ -236,7 +241,7 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
             )}
 
             {/* Quoted/Reposted Content */}
-            {tweet.quoted_tweet_text && (
+            {(tweet.quoted_tweet_text || repostContent) && (
               <div className={`mt-3 p-3 rounded-xl border border-border/50 bg-muted/20 relative group overflow-hidden flex-1 flex flex-col justify-center min-h-[60px] ${isRepost ? 'border-neon-green/20 bg-neon-green/5' : ''}`}>
                 {isQuote && <Quote className="absolute -top-1 -right-1 w-8 h-8 text-foreground/5 pointer-events-none" />}
                 {isRepost && (
@@ -245,7 +250,7 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
                   </div>
                 )}
                 <p className={`text-foreground text-sm leading-relaxed italic relative z-10 ${isRepost ? 'line-clamp-6' : 'line-clamp-3'}`}>
-                  {highlightMatchesInText(tweet.quoted_tweet_text, matchingOptions)}
+                  {highlightMatchesInText(tweet.quoted_tweet_text || repostContent || "", matchingOptions)}
                 </p>
               </div>
             )}
