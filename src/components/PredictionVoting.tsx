@@ -381,9 +381,9 @@ export const PredictionVoting = () => {
                   </div>
                 </div>
 
-                <div className="mt-4 p-2.5 rounded-lg bg-muted/30 border border-border/50 flex items-start gap-2.5">
-                  <Gift className="w-3.5 h-3.5 text-neon-orange shrink-0 mt-0.5" />
-                  <p className="text-[10px] leading-relaxed text-muted-foreground">
+                <div className="mt-4 p-3 rounded-lg bg-muted/30 border border-border/50 flex items-start gap-2.5">
+                  <Gift className="w-4 h-4 text-neon-orange shrink-0 mt-0.5" />
+                  <p className="text-sm sm:text-base leading-relaxed text-muted-foreground">
                     Rewards are sent automatically to winner wallets after each round. No claiming needed!
                   </p>
                 </div>
