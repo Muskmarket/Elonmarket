@@ -51,7 +51,7 @@ Our dedicated scraping engine monitors Elon's X profile in real-time. A valid wi
 - Be authored or reposted by Elon.
 - Appear within the prediction window.
 - Contain an exact keyword match (e.g., "Starlink" or "@Tesla").
-- Be the **first** matching post detected in the window.
+- Be the **first** matching option detected in the window.
 
 ### 6️⃣ Automated Distribution
 Once a winner is determined:
