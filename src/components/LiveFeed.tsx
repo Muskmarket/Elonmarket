@@ -170,7 +170,7 @@ const TweetCard = React.forwardRef(({ tweet, index, predictionOptions }: { tweet
   }, [postDate.getTime()]);
 
   // Detect if it's a pure repost based on tweet_type or text prefix
-  const isRepost = tweet.tweet_type === "repost" || tweet.text.toLowerCase().startsWith("rt by @");
+  const isRepost = tweet.tweet_type === "repost" || /^rt\s+(by\s+)?@/i.test(tweet.text);
   const isQuote = tweet.tweet_type === "quote" && !isRepost;
 
   // Preserve @mentions (e.g. @Tesla, @SpaceX) - only collapse extra spaces

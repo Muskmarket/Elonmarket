@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
       parsedDate = new Date().toISOString();
     }
 
-    const tweetType = tweetTypeRaw === "quote" ? ("quote" as const) : ("post" as const);
+    const tweetType = tweetTypeRaw === "quote" ? "quote" : tweetTypeRaw === "repost" ? "repost" : "post";
 
     const tweetRecord = {
       tweet_id: tweetId,
