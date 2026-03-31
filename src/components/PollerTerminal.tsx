@@ -180,6 +180,8 @@ export const PollerTerminal = () => {
                         ? log.message.replace(/^Reply skipped:\s*/i, "Elon Musk Reply: ").replace(/^Skipped reply:\s*/i, "Elon Musk Reply: ")
                         : log.level === "quote" && /New quote detected:/i.test(log.message)
                         ? log.message.replace(/^New quote detected:\s*/i, "Elon Musk quote: ")
+                        : log.level === "tweet" && /New post detected:/i.test(log.message)
+                        ? log.message.replace(/^New post detected:\s*/i, "Elon Musk post: ")
                         : log.message}
                     </span>
                   </motion.div>
