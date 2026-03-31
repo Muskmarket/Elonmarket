@@ -193,7 +193,7 @@ export const PollerTerminal = () => {
           {/* Footer */}
           <div className="px-3 py-1 bg-black/60 border-t border-neon-green/10 flex items-center justify-between">
             <span className="text-[9px] font-mono text-muted-foreground/40">
-              nitter-poller v1.0 • 10s interval
+              elonmarket-poller v1.0 • 10s interval
             </span>
             <span className="text-[9px] font-mono text-muted-foreground/40">
               {logs.length} entries
