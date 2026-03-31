@@ -194,10 +194,10 @@ export const PollerTerminal = () => {
 
           {/* Footer */}
           <div className="px-3 py-1.5 bg-black/60 border-t border-neon-green/10 flex items-center justify-between">
-            <span className="text-xs sm:text-sm font-mono text-muted-foreground">
+            <span className="text-[9px] sm:text-sm font-mono text-muted-foreground/40 sm:text-muted-foreground">
               elonmarket-poller v1.0 • 10s interval
             </span>
-            <span className="text-xs sm:text-sm font-mono text-muted-foreground">
+            <span className="text-[9px] sm:text-sm font-mono text-muted-foreground/40 sm:text-muted-foreground">
               {logs.length} entries
             </span>
           </div>
