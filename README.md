@@ -1,7 +1,11 @@
 # 🚀 Elonmarket: Free-to-Play Elon Prediction Market (SOL Rewards)
 
 
-Elonmarket is a decentralized, free-to-play prediction marketplace where users predict what Elon Musk will post first next on X. Will it be about Grok, Starlink, Tesla, or X? Winners automatically receive SOL rewards directly in their wallets—no manual claims, no gas interactions, and no complex wallet connections.
+ElonMarket is a decentralized, free-to-play prediction market where people predict what Elon Musk will post first on X among the prediction options available.
+
+The game works by letting players vote on different topic options for Elon’s post for example Grok, Starlink, Tesla, or X. Each round collects votes from the community on which topic they believe Elon will post about first among the topics.
+
+Once Elon makes a new post, the system automatically scans it. The first option that matches the detected topic of the post becomes the winning choice, and everyone who voted for that option wins the round. Winners automatically receive SOL rewards directly in their wallets—no manual claims, no gas interactions, and no complex wallet connections.
 
 
 **Simple. Transparent. Automated.**
