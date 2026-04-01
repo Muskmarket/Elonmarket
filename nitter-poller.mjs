@@ -181,15 +181,26 @@ async function poll() {
 
       
 
-      const isRt = /^RT by\s+@/i.test(title);
+      // Detect repost: Nitter uses "RT by @username: ..." in title
+      const isRt = /^RT\s+(by\s+)?@/i.test(title);
       const { 
-        mainText, 
+        mainText: rawMainText, 
         quotedTweetText, 
         quotedAuthorName, 
         quotedAuthorUsername, 
         quotedAuthorAvatar, 
         mediaUrl 
       } = parseQuoteFromDescription(title, description);
+
+      // For reposts, strip the RT prefix from mainText so we get clean content
+      const mainText = isRt ? stripRtPrefix(rawMainText) || rawMainText : rawMainText;
+
+      // For reposts without a quotedTweetText, extract the actual content from description
+      let finalQuotedText = quotedTweetText;
+      if (isRt && !finalQuotedText) {
+        const descText = stripHtml(description).trim();
+        if (descText) finalQuotedText = descText;
+      }
 
       const body = {
         text: mainText,
@@ -199,7 +210,7 @@ async function poll() {
         author_username: PROFILE_USERNAME,
         tweet_type: isRt ? "repost" : (quotedTweetText ? "quote" : "post"),
       };
-      if (quotedTweetText) body.quoted_tweet_text = quotedTweetText;
+      if (finalQuotedText) body.quoted_tweet_text = finalQuotedText;
       if (quotedAuthorName) body.quoted_author_name = quotedAuthorName;
       if (quotedAuthorUsername) body.quoted_author_username = quotedAuthorUsername;
       if (quotedAuthorAvatar) body.quoted_author_avatar = quotedAuthorAvatar;
