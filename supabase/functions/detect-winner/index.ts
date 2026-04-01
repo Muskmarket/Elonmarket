@@ -299,7 +299,7 @@ async function processWinnerDetection(
   }
 
   for (const tweet of tweets) {
-    if (tweet.tweet_type !== "post" && tweet.tweet_type !== "quote") continue;
+    // Include posts, quotes, AND reposts for keyword matching
 
     const match = matchTweetToOption(getTweetTextForMatching(tweet), options);
     if (match) {
