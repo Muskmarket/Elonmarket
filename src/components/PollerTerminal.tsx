@@ -179,6 +179,13 @@ export const PollerTerminal = () => {
                           Elon Musk Post: {log.message.replace(/^New\s+post\s+detected:\s*/i, "")}
                         </span>
                       </>
+                    ) : (log.level === "repost" || /New repost detected:/i.test(log.message)) ? (
+                      <>
+                        <span className="font-bold uppercase text-purple-400">REPOST</span>{" "}
+                        <span className="text-foreground/70">
+                          Elon Musk Repost: {log.message.replace(/^New\s+repost\s+detected:\s*/i, "")}
+                        </span>
+                      </>
                     ) : (
                       <>
                         <span className={`font-bold uppercase ${levelColors[log.level] || "text-foreground"}`}>

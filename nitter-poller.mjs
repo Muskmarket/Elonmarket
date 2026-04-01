@@ -57,9 +57,9 @@ console.log("Using PROFILE_USERNAME:", PROFILE_USERNAME);
 
 let lastTweetId = null;
 
-/** Strip the "RT by @username: " prefix from tweet text. */
+/** Strip the "RT by @username: " or "RT @username: " prefix from tweet text. */
 function stripRtPrefix(text) {
-  return (text || "").replace(/^RT by\s+@\w+:\s*/i, "").trim().toLowerCase();
+  return (text || "").replace(/^RT\s+(by\s+)?@\w+:\s*/i, "").trim();
 }
 
 /** Strip HTML tags from a string. */
