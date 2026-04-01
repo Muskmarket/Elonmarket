@@ -218,7 +218,7 @@ async function poll() {
       } else {
         const preview = quotedTweetText ? `${mainText.slice(0, 40)}... [+quote]` : mainText.slice(0, 80);
         await log("success", `Sent to backend: ${preview}`);
-        trackText(mainText);
+        
       }
 
       lastTweetId = guid;
