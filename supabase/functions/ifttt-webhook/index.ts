@@ -152,9 +152,9 @@ Deno.serve(async (req) => {
       : rawType.includes("repost") || rawType.includes("retweet") || /^RT\s+@/i.test(tweetText) ? "repost"
       : "post";
 
+    // Only include columns that exist in the tweets table schema
     const tweetRecord = {
       tweet_id: tweetId,
-      tweet_url: tweetUrl,
       text: tweetText,
       author_id: authorId,
       author_username: authorUsername,
@@ -163,11 +163,6 @@ Deno.serve(async (req) => {
       tweet_type: tweetType,
       quoted_tweet_id: (tweetType === "quote" || tweetType === "repost") ? quotedTweetId : null,
       quoted_tweet_text: (tweetType === "quote" || tweetType === "repost") ? quotedTweetText : null,
-      quoted_tweet_author_name: (tweetType === "quote" || tweetType === "repost") ? quotedTweetAuthorName : null,
-      quoted_tweet_author_username: (tweetType === "quote" || tweetType === "repost") ? quotedTweetAuthorUsername : null,
-      quoted_tweet_author_avatar: (tweetType === "quote" || tweetType === "repost") ? quotedTweetAuthorAvatar : null,
-      media_url: mediaUrl,
-      media_type: mediaType,
       created_at_twitter: parsedDate,
       fetched_at: new Date().toISOString(),
     };
