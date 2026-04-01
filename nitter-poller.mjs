@@ -199,7 +199,7 @@ async function poll() {
       }
 
       // Deduplicate: if the core text (stripped of RT prefix) was already sent, skip
-      if (isDuplicateText(title)) {
+      if (!/^RT by\s+@/i.test(title) && isDuplicateText(title)) {
         await log("skip", `Duplicate skipped: ${title.slice(0, 60)}`);
         lastTweetId = guid;
         continue;
