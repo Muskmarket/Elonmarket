@@ -172,11 +172,11 @@ export const PollerTerminal = () => {
                     <span className="text-muted-foreground/40 select-none">
                       [{formatTime(log.created_at)}]
                     </span>{" "}
-                    {/New post detected:/i.test(log.message) ? (
+                    {(log.level === "post" || log.level === "tweet" || /New post detected:/i.test(log.message)) ? (
                       <>
                         <span className="font-bold uppercase text-neon-green">POST</span>{" "}
                         <span className="text-foreground/70">
-                          Elon Musk Post: {log.message.replace(/^New post detected:\s*/i, "")}
+                          Elon Musk Post: {log.message.replace(/^New\s+post\s+detected:\s*/i, "")}
                         </span>
                       </>
                     ) : (
