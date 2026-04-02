@@ -524,7 +524,7 @@ const Docs = () => {
                     <tbody className="divide-y divide-border/50">
                        <tr><td className="px-6 py-4 font-bold">Eligibility</td><td className="px-6 py-4 text-muted-foreground">Username + $EMARKET Token Holding</td></tr>
                        <tr><td className="px-6 py-4 font-bold">Voting</td><td className="px-6 py-4 text-muted-foreground">Max 1 vote per round per user</td></tr>
-                       <tr><td className="px-6 py-4 font-bold">Payouts</td><td className="px-6 py-4 text-muted-foreground">10% - 20% of vault per round</td></tr>
+                       <tr><td className="px-6 py-4 font-bold">Payouts</td><td className="px-6 py-4 text-muted-foreground">2% - 10% of vault per round</td></tr>
                        <tr><td className="px-6 py-4 font-bold">Claiming</td><td className="px-6 py-4 text-muted-foreground">Not required (Fully Automated)</td></tr>
                     </tbody>
                   </table>
