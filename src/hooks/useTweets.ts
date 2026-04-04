@@ -1,10 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const CACHE_KEY = "elonmarket_tweets_cache";
 const MAX_TWEETS = 12;
 const RETRY_DELAYS = [2000, 4000, 8000]; // Exponential backoff
-const POLL_INTERVAL = 30_000; // 30s instead of 60s
 
 export interface Tweet {
   id: string;
@@ -71,7 +70,6 @@ export function useTweets() {
   const [tweets, setTweets] = useState<Tweet[]>(() => getCachedTweets());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const fetchTweets = useCallback(async () => {
     try {
@@ -86,18 +84,19 @@ export function useTweets() {
     } catch (err) {
       console.error("Tweet fetch error:", err);
       setError(err instanceof Error ? err.message : "Failed to load tweets");
+      // Keep showing cached tweets — don't clear state
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Subscribe to realtime
-  const subscribe = useCallback(() => {
-    // Clean up existing channel
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-    }
+  useEffect(() => {
+    fetchTweets();
 
+    // Auto-refresh every 60 seconds
+    const interval = setInterval(fetchTweets, 60_000);
+
+    // Realtime subscription for instant updates
     const channel = supabase
       .channel("tweets-realtime")
       .on(
@@ -129,42 +128,11 @@ export function useTweets() {
       )
       .subscribe();
 
-    channelRef.current = channel;
-  }, []);
-
-  useEffect(() => {
-    fetchTweets();
-    subscribe();
-
-    // Poll at a shorter interval
-    const interval = setInterval(fetchTweets, POLL_INTERVAL);
-
-    // Re-fetch + reconnect realtime when tab becomes visible again (mobile focus)
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        fetchTweets();
-        subscribe();
-      }
-    };
-
-    // Also re-fetch when network comes back online
-    const handleOnline = () => {
-      fetchTweets();
-      subscribe();
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("online", handleOnline);
-
     return () => {
       clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("online", handleOnline);
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
+      channel.unsubscribe();
     };
-  }, [fetchTweets, subscribe]);
+  }, [fetchTweets]);
 
   return { tweets, loading, error, refetch: fetchTweets };
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,23 +41,24 @@ export const PollerTerminal = () => {
   const [connected, setConnected] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Fetch recent logs and subscribe to realtime
-  const fetchLogs = useCallback(async () => {
-    const { data } = await supabase
-      .from("poller_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(MAX_VISIBLE_LOGS);
-
-    if (data) {
-      setLogs(data.reverse());
-    }
-  }, []);
-
+  // Fetch recent logs on mount
   useEffect(() => {
+    const fetchLogs = async () => {
+      const { data } = await supabase
+        .from("poller_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(MAX_VISIBLE_LOGS);
+
+      if (data) {
+        setLogs(data.reverse());
+      }
+    };
+
     fetchLogs();
 
-    let channel = supabase
+    // Subscribe to realtime inserts
+    const channel = supabase
       .channel("poller-logs-realtime")
       .on(
         "postgres_changes",
@@ -74,43 +75,10 @@ export const PollerTerminal = () => {
         setConnected(status === "SUBSCRIBED");
       });
 
-    // Re-fetch + reconnect when tab becomes visible (fixes mobile stale logs)
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        fetchLogs();
-        supabase.removeChannel(channel);
-        channel = supabase
-          .channel("poller-logs-realtime-" + Date.now())
-          .on(
-            "postgres_changes",
-            { event: "INSERT", schema: "public", table: "poller_logs" },
-            (payload) => {
-              const newLog = payload.new as PollerLog;
-              setLogs((prev) => {
-                const updated = [...prev, newLog];
-                return updated.slice(-MAX_VISIBLE_LOGS);
-              });
-            }
-          )
-          .subscribe((status) => {
-            setConnected(status === "SUBSCRIBED");
-          });
-      }
-    };
-
-    const handleOnline = () => {
-      fetchLogs();
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("online", handleOnline);
-
     return () => {
       supabase.removeChannel(channel);
-      document.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("online", handleOnline);
     };
-  }, [fetchLogs]);
+  }, []);
 
   // Auto-scroll to bottom on new logs
   useEffect(() => {

@@ -98,18 +98,9 @@ Deno.serve(async (req) => {
 
     // ── Build tweet record ─────────────────────────────
     const tweetIdMatch = tweetUrl.match(/status\/(\d+)/);
-    const rawTweetId = tweetIdMatch
+    const tweetId = tweetIdMatch
       ? tweetIdMatch[1]
       : `ifttt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Normalize tweet type early so we can use it for ID prefixing
-    const rawType = tweetTypeRaw.toLowerCase();
-    const tweetType = rawType.includes("quote") ? "quote"
-      : rawType.includes("repost") || rawType.includes("retweet") || /^RT\s+@/i.test(tweetText) ? "repost"
-      : "post";
-
-    // Prefix repost IDs with "rt_" to avoid overwriting original tweets with the same status ID
-    const tweetId = tweetType === "repost" ? `rt_${rawTweetId}` : rawTweetId;
 
     // IFTTT sends timestamps in the applet-owner's local timezone.
     // Configure this offset (in hours) to match your IFTTT account timezone.
@@ -155,7 +146,11 @@ Deno.serve(async (req) => {
       parsedDate = new Date().toISOString();
     }
 
-    // tweetType already computed above
+    // Normalize tweet type — detect reposts from text even if tweet_type wasn't set
+    const rawType = tweetTypeRaw.toLowerCase();
+    const tweetType = rawType.includes("quote") ? "quote"
+      : rawType.includes("repost") || rawType.includes("retweet") || /^RT\s+@/i.test(tweetText) ? "repost"
+      : "post";
 
     // Only include columns that exist in the tweets table schema
     const tweetRecord = {
