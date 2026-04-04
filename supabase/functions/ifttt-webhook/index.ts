@@ -98,9 +98,13 @@ Deno.serve(async (req) => {
 
     // ── Build tweet record ─────────────────────────────
     const tweetIdMatch = tweetUrl.match(/status\/(\d+)/);
+    // Also handle bare numeric tweet URLs (e.g. just "2040391655480815751")
+    const bareNumericMatch = !tweetIdMatch && /^\d{10,}$/.test(tweetUrl.trim());
     const rawTweetId = tweetIdMatch
       ? tweetIdMatch[1]
-      : `ifttt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      : bareNumericMatch
+        ? tweetUrl.trim()
+        : `ifttt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Normalize tweet type early so we can use it for ID prefixing
     const rawType = tweetTypeRaw.toLowerCase();
@@ -157,6 +161,14 @@ Deno.serve(async (req) => {
 
     // tweetType already computed above
 
+    // For reposts, try to extract original author from the Nitter link URL
+    // e.g. "http://nitter.net/OriginalAuthor/status/123456" -> "OriginalAuthor"
+    const urlAuthorMatch = tweetUrl.match(/\/([^\/]+)\/status\/\d+/);
+    const resolvedQuotedAuthorUsername = quotedTweetAuthorUsername
+      || ((tweetType === "repost" && urlAuthorMatch) ? urlAuthorMatch[1] : null);
+    const resolvedQuotedAuthorName = quotedTweetAuthorName
+      || ((tweetType === "repost" && urlAuthorMatch) ? urlAuthorMatch[1] : null);
+
     // Build the canonical X/Twitter URL from the raw status ID
     const canonicalTweetUrl = rawTweetId.match(/^\d+$/)
       ? `https://x.com/${authorUsername}/status/${rawTweetId}`
@@ -174,8 +186,8 @@ Deno.serve(async (req) => {
       tweet_type: tweetType,
       quoted_tweet_id: (tweetType === "quote" || tweetType === "repost") ? quotedTweetId : null,
       quoted_tweet_text: (tweetType === "quote" || tweetType === "repost") ? quotedTweetText : null,
-      quoted_tweet_author_name: (tweetType === "quote" || tweetType === "repost") ? quotedTweetAuthorName : null,
-      quoted_tweet_author_username: (tweetType === "quote" || tweetType === "repost") ? quotedTweetAuthorUsername : null,
+      quoted_tweet_author_name: (tweetType === "quote" || tweetType === "repost") ? resolvedQuotedAuthorName : null,
+      quoted_tweet_author_username: (tweetType === "quote" || tweetType === "repost") ? resolvedQuotedAuthorUsername : null,
       quoted_tweet_author_avatar: (tweetType === "quote" || tweetType === "repost") ? quotedTweetAuthorAvatar : null,
       media_url: mediaUrl,
       media_type: mediaUrl ? mediaType : null,

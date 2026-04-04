@@ -257,14 +257,27 @@ async function poll() {
 
       // Detect repost: Nitter uses "RT by @username: ..." in title
       const isRt = /^RT\s+(by\s+)?@/i.test(title);
-      const { 
-        mainText: rawMainText, 
-        quotedTweetText, 
-        quotedAuthorName, 
-        quotedAuthorUsername, 
-        quotedAuthorAvatar, 
-        mediaUrl 
+      const {
+        mainText: rawMainText,
+        quotedTweetText,
+        quotedAuthorName,
+        quotedAuthorUsername,
+        quotedAuthorAvatar,
+        mediaUrl
       } = parseQuoteFromDescription(title, description);
+
+      // For reposts, extract original author from the Nitter link URL
+      // Link format: http://nitter.instance/OriginalAuthor/status/123456#m
+      let repostOriginalUsername = quotedAuthorUsername;
+      let repostOriginalName = quotedAuthorName;
+      if (isRt && !repostOriginalUsername) {
+        const linkAuthorMatch = link.match(/\/([^\/]+)\/status\/\d+/);
+        if (linkAuthorMatch) {
+          repostOriginalUsername = linkAuthorMatch[1];
+          // Use the username as display name if we don't have the real name
+          if (!repostOriginalName) repostOriginalName = linkAuthorMatch[1];
+        }
+      }
 
       // For reposts, strip the RT prefix from mainText so we get clean content
       const mainText = isRt ? stripRtPrefix(rawMainText) || rawMainText : rawMainText;
@@ -276,9 +289,15 @@ async function poll() {
         if (descText) finalQuotedText = descText;
       }
 
+      // For reposts, strip the "Name (@username):" prefix from quoted text if we extracted author separately
+      if (isRt && finalQuotedText && repostOriginalUsername) {
+        finalQuotedText = finalQuotedText.replace(/^[^(@\n]{0,80}\(@\w+\)\s*:?\s*/u, "").trim() || finalQuotedText;
+      }
+
       const body = {
         text: mainText,
-        tweet_url: isRt ? guid : link,
+        // For reposts, use link (has original author in URL path) instead of guid (bare number)
+        tweet_url: link,
         // For reposts, use current time (when repost was detected) so they appear
         // at the top of the feed, not buried at the original post's time.
         created_at: isRt ? new Date().toISOString() : pubDate,
@@ -287,8 +306,8 @@ async function poll() {
         tweet_type: isRt ? "repost" : (quotedTweetText ? "quote" : "post"),
       };
       if (finalQuotedText) body.quoted_tweet_text = finalQuotedText;
-      if (quotedAuthorName) body.quoted_author_name = quotedAuthorName;
-      if (quotedAuthorUsername) body.quoted_author_username = quotedAuthorUsername;
+      if (repostOriginalName) body.quoted_author_name = repostOriginalName;
+      if (repostOriginalUsername) body.quoted_author_username = repostOriginalUsername;
       if (quotedAuthorAvatar) body.quoted_author_avatar = quotedAuthorAvatar;
       if (mediaUrl) body.media_url = mediaUrl;
 
