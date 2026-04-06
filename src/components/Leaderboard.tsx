@@ -63,7 +63,7 @@ export const Leaderboard = () => {
         <div className="text-center mb-10">
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
             <span className="gradient-text">TOP</span>{" "}
-            <span className="text-foreground">EARNERS</span>
+            <span className="text-foreground">ELON WHISPERERS</span>
           </h2>
           <p className="text-muted-foreground">Ranked by total earnings</p>
         </div>
