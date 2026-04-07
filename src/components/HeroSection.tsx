@@ -1,9 +1,10 @@
-import { TrendingUp, Users, Zap, DollarSign, Target } from "lucide-react";
+import { TrendingUp, Users, Zap, DollarSign, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlatformData } from "@/hooks/usePlatformData";
 import { useOnchainData } from "@/hooks/useOnchainData";
 import { usePredictionRound } from "@/hooks/usePredictionRound";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export const HeroSection = () => {
   const { payoutStats, playerCount } = usePlatformData();
