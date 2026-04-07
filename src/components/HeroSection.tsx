@@ -114,7 +114,7 @@ export const HeroSection = () => {
               </a>
             </Button>
             <Button asChild variant="outline" size="lg" className="group min-w-[200px] border-white/20 hover:bg-white/5 transition-all hover:scale-105 active:scale-95">
-              <a href="https://pump.fun/coin/C8CjxHwnSWYWsBXnBnAZMAQjK9QVwTLRtRvJUfk5pump" target="_blank" rel="noopener noreferrer">
+              <a href="https://pump.fun/coin/8sMbdtCxNrgeDPpAvAkNWnwGWmuTVR4SYycVH1HFpump" target="_blank" rel="noopener noreferrer">
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Buy $EMARKET
               </a>
