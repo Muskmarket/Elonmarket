@@ -187,7 +187,7 @@ export const RoundResultDialog = () => {
             <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-black mb-3">
               {isNoWinner ? "Round Summary" : "Verified Post"}
             </p>
-            <p className="text-white/80 italic leading-relaxed text-base">
+            <p className="text-white/80 italic leading-relaxed text-sm">
               "{result.winningTweetText || (isNoWinner ? "No matching post was detected during this round." : "The round ended after a verified winning post was matched.")}"
             </p>
           </div>
