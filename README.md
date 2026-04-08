@@ -1,6 +1,6 @@
 # 🚀 Elonmarket: Free-to-Play Elon Prediction Market (SOL Rewards)
 
-ca: 8sMbdtCxNrgeDPpAvAkNWnwGWmuTVR4SYycVH1HFpump
+ca: HzRrwoMTjWbq3rqMM8J3mT6rFW1ERT5VBo5r34qopump
 
 
 ElonMarket is a decentralized, free-to-play Elon prediction market where people predict what Elon Musk will post first on X among the prediction options available.
