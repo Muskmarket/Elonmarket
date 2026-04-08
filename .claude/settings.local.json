@@ -11,7 +11,24 @@
       "Bash(npx -y --package zod --package @supabase/mcp-server-supabase@latest supabase-mcp-server --help)",
       "Bash(npm list:*)",
       "Bash(npx @supabase/mcp-server-supabase --version)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(where claude:*)",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__get_project_url",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__get_publishable_keys",
+      "Bash(curl:*)",
+      "mcp__supabase__get_logs",
+      "mcp__supabase__get_edge_function",
+      "mcp__supabase__deploy_edge_function"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase-fiverr-client",
+    "context7",
+    "tanstack",
+    "moltbot-docs",
+    "supabase"
+  ]
 }
