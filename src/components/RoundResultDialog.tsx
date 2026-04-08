@@ -182,7 +182,7 @@ export const RoundResultDialog = () => {
             )}
           </div>
 
-          <div className="w-full bg-white/[0.03] border border-white/5 rounded-2xl p-6 mb-8 group relative overflow-hidden">
+          <div className="w-full bg-white/[0.03] border border-white/5 rounded-xl p-4 mb-5 group relative overflow-hidden">
             <Quote className="absolute -top-2 -right-2 w-12 h-12 text-white/5 -rotate-12" />
             <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest font-black mb-3">
               {isNoWinner ? "Round Summary" : "Verified Post"}
