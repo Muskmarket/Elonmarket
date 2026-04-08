@@ -1,15 +1,23 @@
 {
   "mcpServers": {
-    "supabase_fiverr_client": {
+    "supabase-fiverr-client": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=xzswyicqxtocruvjyqlf",
       "headers": {
-        "Authorization": "Bearer sbp_b2b3e115be26e648371c56214adf8bd32d140aae"
+        "Authorization": "Bearer sbp_2c3afff2625fffcf7482fc49dc867d861380cc55"
       }
     },
     "context7": {
       "command": "cmd",
       "args": ["/c", "npx", "-y", "@upstash/context7-mcp@latest"]
+    },
+    "tanstack": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@tanstack/cli", "mcp"]
+    },
+    "moltbot-docs": {
+      "command": "cmd",
+      "args": ["/c", "npx", "mcp-remote", "https://gitmcp.io/moltbot/moltbot"]
     }
   }
 }
