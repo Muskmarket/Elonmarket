@@ -148,13 +148,13 @@ export const RoundResultDialog = () => {
             />
             <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center rotate-3 hover:rotate-0 transition-transform duration-500">
               {isNoWinner ? (
-                <AlertCircle className="w-10 h-10 text-neon-orange" />
+                <AlertCircle className="w-7 h-7 text-neon-orange" />
               ) : result.isPersonalWinner ? (
-                <Gift className="w-10 h-10 text-neon-green" />
+                <Gift className="w-7 h-7 text-neon-green" />
               ) : userVotedAndLost ? (
-                <AlertCircle className="w-10 h-10 text-neon-orange" />
+                <AlertCircle className="w-7 h-7 text-neon-orange" />
               ) : (
-                <Trophy className="w-10 h-10 text-neon-cyan" />
+                <Trophy className="w-7 h-7 text-neon-cyan" />
               )}
             </div>
           </motion.div>
