@@ -131,7 +131,7 @@ export const RoundResultDialog = () => {
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && handleClose()}>
       <DialogContent className="max-w-[92vw] sm:max-w-[380px] border border-white/10 bg-[#070b14]/90 backdrop-blur-2xl p-0 overflow-hidden rounded-[1.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-        <div className="relative p-8 flex flex-col items-center">
+        <div className="relative p-5 sm:p-6 flex flex-col items-center">
           <div
             className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 blur-[100px] rounded-full opacity-20 pointer-events-none"
             style={{ backgroundColor: glowColor }}
