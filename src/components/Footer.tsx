@@ -31,7 +31,7 @@ export const Footer = () => {
           <div>
             <h4 className="font-display font-medium mb-3 text-sm">Community</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="https://x.com/elonmarketfun" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">X (Twitter)</a></li>
+              <li><a href="https://x.com/elonmarket" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">X (Twitter)</a></li>
               <li><a href="https://github.com/muskmarket/Elonmarket" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">GitHub</a></li>
               <li><a href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">Docs</a></li>
             </ul>
